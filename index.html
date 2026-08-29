@@ -153,9 +153,104 @@
   footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:12.5px;padding:20px 0 34px}
   .foot-in{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
   a{color:var(--accent-ink)}
+
+  /* ===================== MOTION + REFRESH ===================== */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes lineGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes barPulse{0%,100%{transform:scaleY(.32)}50%{transform:scaleY(1)}}
+
+  /* Intro */
+  #intro{position:fixed;inset:0;z-index:100;background:var(--paper);display:flex;align-items:center;justify-content:center;
+    transition:opacity .55s ease, transform .7s cubic-bezier(.7,0,.2,1)}
+  #intro.gone{opacity:0;transform:translateY(-26px);pointer-events:none}
+  #intro.hidden{display:none}
+  .intro-inner{text-align:center;padding:24px}
+  .intro-bars{display:flex;gap:7px;justify-content:center;align-items:flex-end;height:56px;margin:0 auto 24px}
+  .intro-bars i{width:8px;height:56px;border-radius:100px;background:var(--accent);transform-origin:bottom;transform:scaleY(.32);
+    animation:barPulse 1s ease-in-out infinite}
+  .intro-bars i:nth-child(2){animation-delay:.12s;background:var(--ink)}
+  .intro-bars i:nth-child(3){animation-delay:.24s}
+  .intro-bars i:nth-child(4){animation-delay:.36s;background:var(--ink)}
+  .intro-bars i:nth-child(5){animation-delay:.48s}
+  .intro-word{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(30px,7vw,52px);letter-spacing:-.02em;
+    color:var(--ink);opacity:0;animation:fadeUp .7s ease .12s both}
+  .intro-word b{color:var(--accent)}
+  .intro-line{width:min(300px,64vw);height:2px;background:var(--line-strong);margin:16px auto 14px;transform:scaleX(0);
+    animation:lineGrow .6s ease .48s both}
+  .intro-sub{color:var(--ink-2);font-size:14px;letter-spacing:.02em;opacity:0;animation:fadeIn .6s ease .72s both}
+  .intro-skip{position:absolute;right:20px;bottom:18px;appearance:none;border:1px solid var(--line-strong);
+    background:var(--card);color:var(--ink-2);font:inherit;font-size:12.5px;padding:7px 14px;border-radius:100px;cursor:pointer;
+    opacity:0;animation:fadeIn .5s ease .9s both;transition:border-color .15s,color .15s}
+  .intro-skip:hover{border-color:var(--ink-2);color:var(--ink)}
+
+  /* Entradas do app */
+  header{position:relative}
+  header .logo{animation:fadeUp .6s ease both}
+  header .privacy{animation:fadeUp .6s ease .08s both}
+  header .seg{animation:fadeUp .6s ease .16s both}
+  .view.active{animation:fadeIn .35s ease both}
+  .panel.active{animation:fadeUp .42s ease both}
+
+  /* Microinterações */
+  .controls,.stage,.batchlist{transition:box-shadow .28s ease, transform .28s ease}
+  .controls:hover,.stage:hover{transform:translateY(-2px);
+    box-shadow:0 2px 4px rgba(27,25,23,.06), 0 16px 36px rgba(27,25,23,.10)}
+  .drop{transition:border-color .18s, background .18s, transform .18s}
+  .drop:hover{transform:translateY(-1px)}
+  .preset{transition:border-color .15s, background .15s, transform .12s}
+  .preset:hover{transform:translateY(-1px)}
+  nav.tabs .tab{transition:color .18s, border-color .25s}
+  .seg button{transition:background .2s, color .2s, transform .1s}
+  .seg button:active{transform:scale(.96)}
+  .btn{transition:background .15s, transform .06s, box-shadow .22s}
+  .btn:not(.ghost):hover{box-shadow:0 8px 20px rgba(180,80,46,.24)}
+
+  /* Aviso de uso responsável */
+  .disclaimer{display:flex;gap:10px;align-items:flex-start;background:#fbf1ec;border:1px solid #e7c9ba;
+    border-radius:10px;padding:11px 13px;margin:2px 0 16px;font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+  .disclaimer b{color:var(--ink);font-weight:600}
+  .disclaimer-ic{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;
+    font-weight:700;font-size:13px;line-height:20px;text-align:center}
+
+  @media (prefers-reduced-motion: reduce){
+    #intro .intro-bars i,.intro-word,.intro-line,.intro-sub,.intro-skip,
+    header .logo,header .privacy,header .seg,.view.active,.panel.active{animation:none;opacity:1;transform:none}
+    .controls:hover,.stage:hover,.drop:hover,.preset:hover{transform:none}
+  }
 </style>
 </head>
 <body>
+
+<!-- ===== INTRO ===== -->
+<div id="intro">
+  <div class="intro-inner">
+    <div class="intro-bars" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <div class="intro-word">Oficina de <b>Mídia</b></div>
+    <div class="intro-line"></div>
+    <div class="intro-sub">imagem · vídeo · direto no seu navegador</div>
+  </div>
+  <button class="intro-skip" id="intro-skip">Pular</button>
+</div>
+<noscript><style>#intro{display:none!important}</style></noscript>
+<script>
+(function(){
+  var intro=document.getElementById('intro'); if(!intro) return;
+  var seen=false; try{ seen=sessionStorage.getItem('ofm_intro')==='1'; }catch(e){}
+  if(seen){ intro.classList.add('hidden'); return; }
+  var done=false;
+  function dismiss(){ if(done) return; done=true; intro.classList.add('gone');
+    try{ sessionStorage.setItem('ofm_intro','1'); }catch(e){}
+    setTimeout(function(){ intro.classList.add('hidden'); }, 700); }
+  var t=setTimeout(dismiss, 2300);
+  var sk=document.getElementById('intro-skip');
+  if(sk) sk.addEventListener('click',function(){ clearTimeout(t); dismiss(); });
+  intro.addEventListener('click',function(e){ if(e.target===intro){ clearTimeout(t); dismiss(); } });
+})();
+</script>
+
 <header>
   <div class="wrap">
     <div class="head-in">
@@ -414,6 +509,10 @@
       <div class="controls" style="max-width:640px;margin:22px auto 0">
         <h3>Baixar do YouTube</h3>
         <div class="sub">Cole o link do vídeo e escolha a qualidade. Até 4K ou só o áudio.</div>
+        <div class="disclaimer">
+          <span class="disclaimer-ic" aria-hidden="true">!</span>
+          <span>Baixe apenas conteúdo <b>seu</b>, de <b>domínio público</b>, <b>Creative Commons</b> ou com <b>permissão</b>. Respeite os direitos autorais e os Termos do YouTube.</span>
+        </div>
         <div class="field" id="yt-backend-field" style="display:none">
           <label class="lbl">Endereço do servidor (avançado)</label>
           <input type="text" id="yt-backend" placeholder="https://seu-servidor.up.railway.app" spellcheck="false">
