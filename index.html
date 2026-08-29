@@ -339,15 +339,28 @@
               <option value="32">Máxima compressão (menor)</option>
             </select>
           </div>
-          <div class="field">
-            <label class="lbl">Resolução</label>
-            <select id="vc-res">
-              <option value="0">Manter original</option>
-              <option value="1080">1080p (Full HD)</option>
-              <option value="720" selected>720p (HD)</option>
-              <option value="480">480p</option>
-            </select>
+          <div class="row">
+            <div class="field">
+              <label class="lbl">Resolução</label>
+              <select id="vc-res">
+                <option value="0">Manter</option>
+                <option value="1080">1080p</option>
+                <option value="720" selected>720p</option>
+                <option value="480">480p</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="lbl">FPS</label>
+              <select id="vc-fps">
+                <option value="0">Manter</option>
+                <option value="60">60</option>
+                <option value="30">30</option>
+                <option value="24">24</option>
+                <option value="15">15</option>
+              </select>
+            </div>
           </div>
+          <div class="field"><label class="check"><input type="checkbox" id="vc-mute"> Remover áudio (sem som)</label></div>
         </div>
         <!-- CONVERT -->
         <div class="vpanel" id="vp-vconvert" style="display:none">
@@ -737,9 +750,12 @@
   function buildArgs(inName,outName){
     if(vtab==="vcompress"){
       const crf=$("#vc-level").value, res=parseInt($("#vc-res").value)||0;
+      const fps=$("#vc-fps").value, mute=$("#vc-mute").checked;
       const a=["-i",inName,"-c:v","libx264","-crf",crf,"-preset","veryfast","-pix_fmt","yuv420p"];
       if(res) a.push("-vf",`scale=-2:${res}`);
-      a.push("-c:a","aac","-b:a","128k",outName); return a;
+      if(fps!=="0") a.push("-r",fps);
+      if(mute) a.push("-an"); else a.push("-c:a","aac","-b:a","128k");
+      a.push(outName); return a;
     }
     if(vtab==="vconvert"){
       const f=$("#vv-format").value;
