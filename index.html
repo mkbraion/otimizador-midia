@@ -316,8 +316,10 @@
       <button class="tab" role="tab" aria-selected="false" data-vtab="vconvert">Converter formato</button>
       <button class="tab" role="tab" aria-selected="false" data-vtab="vtrim">Cortar duração</button>
       <button class="tab" role="tab" aria-selected="false" data-vtab="vcrop">Cortar p/ redes</button>
+      <button class="tab" role="tab" aria-selected="false" data-vtab="vyt">Baixar do YouTube</button>
     </nav>
 
+    <div id="vid-editor">
     <div class="drop" id="drop-video" style="margin-top:22px">
       <strong>Arraste um vídeo aqui</strong> ou clique para escolher
       <div class="hint">MP4, WebM, MOV, MKV, AVI — processado no seu aparelho (ffmpeg no navegador)</div>
@@ -405,7 +407,37 @@
         <div class="meta" id="v-meta"></div>
       </div>
     </div>
-  </div>
+    </div><!-- /vid-editor -->
+
+    <!-- BAIXAR DO YOUTUBE -->
+    <div id="yt-block" style="display:none">
+      <div class="controls" style="max-width:640px;margin:22px auto 0">
+        <h3>Baixar do YouTube</h3>
+        <div class="sub">Precisa do seu servidor (yt-dlp) rodando — cole o endereço dele abaixo. O download acontece direto do seu servidor para o seu aparelho.</div>
+        <div class="field">
+          <label class="lbl">Endereço do seu servidor</label>
+          <input type="text" id="yt-backend" placeholder="https://seu-servidor.up.railway.app" spellcheck="false">
+        </div>
+        <div class="field">
+          <label class="lbl">Link do vídeo</label>
+          <input type="text" id="yt-url" placeholder="https://www.youtube.com/watch?v=..." spellcheck="false">
+        </div>
+        <button class="btn" id="yt-fetch">Buscar vídeo</button>
+        <div class="status" id="yt-status" style="margin-top:8px"></div>
+        <div id="yt-result" style="display:none;margin-top:16px">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <img id="yt-thumb" alt="" style="width:128px;border-radius:8px;background:var(--paper-2)">
+            <div style="min-width:0"><div id="yt-title" style="font-weight:600;font-size:14px"></div><div id="yt-info" class="sub" style="margin:4px 0 0"></div></div>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <label class="lbl">Qualidade</label>
+            <select id="yt-format"></select>
+          </div>
+          <button class="btn" id="yt-dl">Baixar</button>
+          <div class="note" id="yt-note"></div>
+        </div>
+      </div>
+    </div>
 
   </div>
 </main>
@@ -692,7 +724,10 @@
     tab.addEventListener("click",()=>{
       $$("#view-vid .tab").forEach(t=>t.setAttribute("aria-selected","false"));
       tab.setAttribute("aria-selected","true"); vtab=tab.dataset.vtab;
-      ["vcompress","vconvert","vtrim","vcrop"].forEach(k=>{ $("#vp-"+k).style.display = k===vtab?"block":"none"; });
+      const isYt = vtab==="vyt";
+      $("#vid-editor").style.display = isYt?"none":"block";
+      $("#yt-block").style.display = isYt?"block":"none";
+      if(!isYt) ["vcompress","vconvert","vtrim","vcrop"].forEach(k=>{ $("#vp-"+k).style.display = k===vtab?"block":"none"; });
     });
   });
   // video crop presets
@@ -818,6 +853,47 @@
     }finally{ $("#v-go").disabled=false; setTimeout(()=>{$("#v-prog").style.display="none";},800); }
   });
   $("#v-dl").addEventListener("click",()=>{ if(vOutBlob) download(vOutBlob, $("#v-dl").dataset.name||("video-oficina."+outInfo().ext)); });
+
+  // ===================== YOUTUBE (backend próprio) =====================
+  const ytBackend=$("#yt-backend"), ytUrl=$("#yt-url"); let ytData=null;
+  try{ const saved=localStorage.getItem("ofm_backend"); if(saved) ytBackend.value=saved; }catch(e){}
+  ytBackend.addEventListener("change",()=>{ try{ localStorage.setItem("ofm_backend", ytBackend.value.trim()); }catch(e){} });
+  function backendBase(){ return (ytBackend.value||"").trim().replace(/\/+$/,""); }
+  function fmtDur(s){ s=Math.round(s||0); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+
+  $("#yt-fetch").addEventListener("click",async()=>{
+    const base=backendBase(), url=(ytUrl.value||"").trim();
+    if(!base){ $("#yt-status").textContent="Cole o endereço do seu servidor primeiro."; return; }
+    if(!/youtu\.?be/.test(url)){ $("#yt-status").textContent="Cole um link válido do YouTube."; return; }
+    try{ localStorage.setItem("ofm_backend", base); }catch(e){}
+    $("#yt-result").style.display="none"; $("#yt-status").textContent="Buscando…"; $("#yt-fetch").disabled=true;
+    try{
+      const r=await fetch(base+"/info?url="+encodeURIComponent(url));
+      const data=await r.json();
+      if(!r.ok||data.error) throw new Error(data.error||("HTTP "+r.status));
+      ytData=data;
+      $("#yt-thumb").src=data.thumbnail||"";
+      $("#yt-title").textContent=data.title||"(sem título)";
+      $("#yt-info").textContent=(data.uploader?data.uploader+" · ":"")+fmtDur(data.duration);
+      const sel=$("#yt-format"); sel.innerHTML=""; const maxH=data.maxHeight||1080; const opts=[{v:"best",t:"Melhor disponível"}];
+      [2160,1440,1080,720,480,360].forEach(h=>{ if(h<=maxH) opts.push({v:"h"+h,t:h+"p"}); });
+      opts.push({v:"audio",t:"Só áudio (m4a)"});
+      opts.forEach(o=>{ const op=document.createElement("option"); op.value=o.v; op.textContent=o.t; sel.appendChild(op); });
+      $("#yt-note").textContent=""; $("#yt-status").textContent=""; $("#yt-result").style.display="block";
+    }catch(e){ $("#yt-status").textContent="Erro: "+(e.message||e)+" — o servidor está no ar e acessível (HTTPS)?"; }
+    finally{ $("#yt-fetch").disabled=false; }
+  });
+
+  $("#yt-dl").addEventListener("click",()=>{
+    const base=backendBase(), url=(ytUrl.value||"").trim(); if(!base||!ytData) return;
+    const v=$("#yt-format").value, title=ytData.title||"video";
+    let q="url="+encodeURIComponent(url)+"&title="+encodeURIComponent(title);
+    if(v==="audio") q+="&audio=1"; else if(v.charAt(0)==="h") q+="&height="+v.slice(1);
+    const a=document.createElement("a"); a.href=base+"/download?"+q; a.rel="noopener";
+    document.body.appendChild(a); a.click(); a.remove();
+    $("#yt-note").textContent="O download começou no seu servidor — pode levar um tempo (ele baixa e junta o vídeo antes de enviar).";
+    toast("Download iniciado…");
+  });
 
 })();
 </script>
