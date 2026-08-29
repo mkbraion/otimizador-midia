@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oficina de Mídia — converter, cortar e extrair texto</title>
-<meta name="description" content="Ferramenta rápida no navegador para converter formatos de imagem, cortar para redes sociais e extrair texto (OCR). Nada é enviado para servidores.">
+<title>Oficina de Mídia — imagem e vídeo no navegador</title>
+<meta name="description" content="Ferramenta rápida no navegador: converter e comprimir imagens (em lote), cortar para redes, extrair texto (OCR) e comprimir/converter vídeos. Nada é enviado para servidores.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -21,6 +21,7 @@
     --accent:#b4502e;
     --accent-ink:#8f3d21;
     --ok:#3f6b4f;
+    --warn:#9a6a1e;
     --shadow:0 1px 2px rgba(27,25,23,.05), 0 8px 24px rgba(27,25,23,.06);
     --radius:10px;
   }
@@ -37,23 +38,30 @@
 
   /* Header */
   header{border-bottom:1px solid var(--line);background:var(--paper)}
-  .head-in{display:flex;align-items:baseline;gap:14px;padding:22px 0 20px;flex-wrap:wrap}
+  .head-in{display:flex;align-items:center;gap:14px;padding:22px 0 18px;flex-wrap:wrap}
   .logo{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:22px;letter-spacing:-.01em}
   .logo b{color:var(--accent)}
-  .tag{color:var(--ink-2);font-size:14px;margin-left:auto}
   .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);
-    border:1px solid var(--line);background:var(--card);padding:5px 10px;border-radius:100px}
+    border:1px solid var(--line);background:var(--card);padding:5px 10px;border-radius:100px;margin-left:auto}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block}
 
+  /* Primary segmented switch */
+  .seg{display:inline-flex;background:var(--paper-2);border:1px solid var(--line);border-radius:100px;padding:4px;gap:4px;margin-bottom:2px}
+  .seg button{appearance:none;border:0;background:none;font:inherit;font-weight:600;font-size:14px;color:var(--ink-2);
+    padding:8px 20px;border-radius:100px;cursor:pointer;transition:.15s}
+  .seg button[aria-selected="true"]{background:var(--accent);color:#fff}
+
   /* Tabs */
-  nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:4px;overflow-x:auto}
+  nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:14px;overflow-x:auto}
   .tab{appearance:none;border:0;background:none;font:inherit;font-weight:500;font-size:14.5px;
     color:var(--ink-2);padding:12px 14px;cursor:pointer;border-bottom:2px solid transparent;
     margin-bottom:-1px;white-space:nowrap}
   .tab:hover{color:var(--ink)}
   .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 
-  main{padding:26px 0 60px}
+  main{padding:22px 0 60px}
+  .view{display:none}
+  .view.active{display:block}
   .panel{display:none}
   .panel.active{display:block}
 
@@ -69,7 +77,7 @@
 
   .stage{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
     padding:16px;min-height:220px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
-  .stage canvas,.stage img{max-width:100%;max-height:440px;border-radius:6px;display:block}
+  .stage canvas,.stage img,.stage video{max-width:100%;max-height:440px;border-radius:6px;display:block}
   .stage .empty{color:var(--ink-3);font-size:14px;text-align:center}
 
   .controls{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
@@ -105,6 +113,7 @@
 
   .meta{font-size:12.5px;color:var(--ink-2);margin-top:12px;line-height:1.7}
   .meta b{color:var(--ink);font-weight:600}
+  .note{font-size:12px;color:var(--warn);margin-top:10px;line-height:1.6}
 
   /* Ratio presets */
   .presets{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
@@ -122,9 +131,23 @@
   .progress > i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
   .status{font-size:12.5px;color:var(--ink-2);min-height:18px}
 
+  /* Batch list */
+  .batchlist{margin-top:18px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--card)}
+  .brow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px}
+  .brow:last-child{border-bottom:0}
+  .brow .bname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+  .brow .bsize{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-2)}
+  .brow .bdelta{font-size:11.5px;font-weight:600;color:var(--ok);min-width:52px;text-align:right}
+  .brow .bdelta.up{color:var(--warn)}
+  .brow img{width:38px;height:38px;object-fit:cover;border-radius:6px;background:var(--paper-2)}
+
+  /* ffmpeg log */
+  .log{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);background:#fff;
+    border:1px solid var(--line);border-radius:8px;padding:8px 10px;height:92px;overflow:auto;white-space:pre-wrap;margin-top:10px;display:none}
+
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
     background:var(--ink);color:#fff;padding:10px 18px;border-radius:100px;font-size:13.5px;
-    opacity:0;pointer-events:none;transition:.25s}
+    opacity:0;pointer-events:none;transition:.25s;z-index:9}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
   footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:12.5px;padding:20px 0 34px}
@@ -139,32 +162,39 @@
       <div class="logo">Oficina de <b>Mídia</b></div>
       <span class="privacy"><span class="dot"></span> Roda no seu navegador — nada é enviado</span>
     </div>
-    <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" aria-selected="true" data-tab="convert">Converter &amp; redimensionar</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="crop">Cortar para redes</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="ocr">Extrair texto (OCR)</button>
-    </nav>
+    <div class="seg" role="tablist">
+      <button role="tab" aria-selected="true" data-view="img">Imagem</button>
+      <button role="tab" aria-selected="false" data-view="vid">Vídeo</button>
+    </div>
   </div>
 </header>
 
 <main>
   <div class="wrap">
 
-    <!-- global dropzone -->
-    <div class="drop" id="drop">
+  <!-- ==================== IMAGEM ==================== -->
+  <div class="view active" id="view-img">
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="convert">Converter &amp; redimensionar</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="crop">Cortar para redes</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="batch">Comprimir em lote</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="ocr">Extrair texto (OCR)</button>
+    </nav>
+
+    <!-- single-image dropzone (convert / crop / ocr) -->
+    <div class="drop" id="drop" style="margin-top:22px">
       <strong>Arraste uma imagem aqui</strong>, clique para escolher ou cole (Ctrl+V)
       <div class="hint">JPG, PNG, WEBP, GIF, BMP — a imagem fica só no seu aparelho</div>
       <input type="file" id="file" accept="image/*" hidden>
     </div>
 
-    <!-- ===== CONVERT ===== -->
+    <!-- CONVERT -->
     <section class="panel active" id="panel-convert">
       <div class="grid">
         <div class="stage" id="stage-convert"><div class="empty">A pré-visualização aparece aqui</div></div>
         <div class="controls">
           <h3>Converter &amp; redimensionar</h3>
           <div class="sub">Mude o formato, a qualidade e as dimensões.</div>
-
           <div class="field">
             <label class="lbl">Formato de saída</label>
             <select id="c-format">
@@ -173,33 +203,22 @@
               <option value="image/png">PNG — transparência</option>
             </select>
           </div>
-
           <div class="field" id="c-quality-wrap">
             <label class="lbl">Qualidade <span class="rng-val mono" id="c-quality-val">85%</span></label>
             <input type="range" id="c-quality" min="30" max="100" value="85">
           </div>
-
           <div class="row">
-            <div class="field">
-              <label class="lbl">Largura (px)</label>
-              <input type="number" id="c-w" min="1" placeholder="auto">
-            </div>
-            <div class="field">
-              <label class="lbl">Altura (px)</label>
-              <input type="number" id="c-h" min="1" placeholder="auto">
-            </div>
+            <div class="field"><label class="lbl">Largura (px)</label><input type="number" id="c-w" min="1" placeholder="auto"></div>
+            <div class="field"><label class="lbl">Altura (px)</label><input type="number" id="c-h" min="1" placeholder="auto"></div>
           </div>
-          <div class="field">
-            <label class="check"><input type="checkbox" id="c-lock" checked> Manter proporção</label>
-          </div>
-
+          <div class="field"><label class="check"><input type="checkbox" id="c-lock" checked> Manter proporção</label></div>
           <button class="btn" id="c-go" disabled>Baixar imagem</button>
           <div class="meta" id="c-meta"></div>
         </div>
       </div>
     </section>
 
-    <!-- ===== CROP ===== -->
+    <!-- CROP -->
     <section class="panel" id="panel-crop">
       <div class="grid">
         <div class="stage" id="stage-crop"><div class="empty">A pré-visualização do corte aparece aqui</div></div>
@@ -207,7 +226,6 @@
           <h3>Cortar para redes</h3>
           <div class="sub">Escolhe o formato — corto centralizado, sem distorcer.</div>
           <div class="presets" id="presets"></div>
-
           <div class="field" style="margin-top:16px">
             <label class="lbl">Formato de saída</label>
             <select id="cr-format">
@@ -216,21 +234,57 @@
               <option value="image/png">PNG</option>
             </select>
           </div>
-
           <button class="btn" id="cr-go" disabled>Baixar corte</button>
           <div class="meta" id="cr-meta"></div>
         </div>
       </div>
     </section>
 
-    <!-- ===== OCR ===== -->
+    <!-- BATCH -->
+    <section class="panel" id="panel-batch">
+      <div class="drop" id="drop-batch" style="margin-top:4px">
+        <strong>Arraste várias imagens aqui</strong> ou clique para escolher
+        <div class="hint">Comprime todas de uma vez e baixa em .zip — tudo no navegador</div>
+        <input type="file" id="file-batch" accept="image/*" multiple hidden>
+      </div>
+      <div class="grid">
+        <div>
+          <div class="batchlist" id="batchlist" style="display:none"></div>
+          <div class="meta" id="b-meta"></div>
+        </div>
+        <div class="controls">
+          <h3>Comprimir em lote</h3>
+          <div class="sub">Mesmas configurações para todas as imagens.</div>
+          <div class="field">
+            <label class="lbl">Formato</label>
+            <select id="b-format">
+              <option value="image/webp">WEBP — menor</option>
+              <option value="image/jpeg">JPG</option>
+              <option value="image/png">PNG</option>
+            </select>
+          </div>
+          <div class="field" id="b-quality-wrap">
+            <label class="lbl">Qualidade <span class="rng-val mono" id="b-quality-val">80%</span></label>
+            <input type="range" id="b-quality" min="30" max="100" value="80">
+          </div>
+          <div class="field">
+            <label class="lbl">Largura máxima (px)</label>
+            <input type="number" id="b-maxw" min="1" placeholder="manter original">
+          </div>
+          <button class="btn" id="b-go" disabled>Comprimir tudo</button>
+          <div class="progress" id="b-prog" style="display:none"><i></i></div>
+          <button class="btn ghost" id="b-zip" style="margin-top:10px;display:none">Baixar todas (.zip)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- OCR -->
     <section class="panel" id="panel-ocr">
       <div class="grid">
         <div class="stage" id="stage-ocr"><div class="empty">A imagem para leitura aparece aqui</div></div>
         <div class="controls">
           <h3>Extrair texto (OCR)</h3>
           <div class="sub">Lê o texto da imagem. Português + inglês.</div>
-
           <div class="field">
             <label class="lbl">Idioma</label>
             <select id="o-lang">
@@ -239,13 +293,11 @@
               <option value="eng">Inglês</option>
             </select>
           </div>
-
           <button class="btn" id="o-go" disabled>Ler texto da imagem</button>
           <div class="progress" id="o-prog" style="display:none"><i></i></div>
           <div class="status" id="o-status"></div>
         </div>
       </div>
-
       <div style="margin-top:18px">
         <label class="lbl">Texto extraído</label>
         <textarea class="ocr-out" id="o-out" placeholder="O texto reconhecido aparece aqui…"></textarea>
@@ -255,13 +307,99 @@
         </div>
       </div>
     </section>
+  </div>
+
+  <!-- ==================== VÍDEO ==================== -->
+  <div class="view" id="view-vid">
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-vtab="vcompress">Comprimir</button>
+      <button class="tab" role="tab" aria-selected="false" data-vtab="vconvert">Converter formato</button>
+      <button class="tab" role="tab" aria-selected="false" data-vtab="vtrim">Cortar duração</button>
+      <button class="tab" role="tab" aria-selected="false" data-vtab="vcrop">Cortar p/ redes</button>
+    </nav>
+
+    <div class="drop" id="drop-video" style="margin-top:22px">
+      <strong>Arraste um vídeo aqui</strong> ou clique para escolher
+      <div class="hint">MP4, WebM, MOV, MKV, AVI — processado no seu aparelho (ffmpeg no navegador)</div>
+      <input type="file" id="file-video" accept="video/*" hidden>
+    </div>
+
+    <div class="grid">
+      <div class="stage" id="stage-video"><div class="empty">O vídeo aparece aqui</div></div>
+      <div class="controls">
+        <!-- COMPRESS -->
+        <div class="vpanel" id="vp-vcompress">
+          <h3>Comprimir vídeo</h3>
+          <div class="sub">Reduz o tamanho mantendo qualidade razoável (H.264).</div>
+          <div class="field">
+            <label class="lbl">Nível de compressão</label>
+            <select id="vc-level">
+              <option value="23">Alta qualidade (arquivo maior)</option>
+              <option value="28" selected>Equilibrado (recomendado)</option>
+              <option value="32">Máxima compressão (menor)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Resolução</label>
+            <select id="vc-res">
+              <option value="0">Manter original</option>
+              <option value="1080">1080p (Full HD)</option>
+              <option value="720" selected>720p (HD)</option>
+              <option value="480">480p</option>
+            </select>
+          </div>
+        </div>
+        <!-- CONVERT -->
+        <div class="vpanel" id="vp-vconvert" style="display:none">
+          <h3>Converter formato</h3>
+          <div class="sub">Troca o container/codec do vídeo.</div>
+          <div class="field">
+            <label class="lbl">Formato de saída</label>
+            <select id="vv-format">
+              <option value="mp4">MP4 (H.264) — universal</option>
+              <option value="webm">WebM (VP8) — web</option>
+              <option value="gif">GIF animado</option>
+              <option value="mkv">MKV (H.264)</option>
+              <option value="mov">MOV (H.264)</option>
+              <option value="avi">AVI (MPEG-4)</option>
+              <option value="mp3">MP3 (só áudio)</option>
+            </select>
+          </div>
+          <div class="note" id="vv-note"></div>
+        </div>
+        <!-- TRIM -->
+        <div class="vpanel" id="vp-vtrim" style="display:none">
+          <h3>Cortar duração</h3>
+          <div class="sub">Salva só o trecho entre início e fim.</div>
+          <div class="row">
+            <div class="field"><label class="lbl">Início (s)</label><input type="number" id="vt-start" min="0" step="0.1" value="0"></div>
+            <div class="field"><label class="lbl">Fim (s)</label><input type="number" id="vt-end" min="0" step="0.1" placeholder="fim"></div>
+          </div>
+          <div class="field"><label class="check"><input type="checkbox" id="vt-reencode"> Recodificar (corte mais preciso)</label></div>
+        </div>
+        <!-- CROP -->
+        <div class="vpanel" id="vp-vcrop" style="display:none">
+          <h3>Cortar p/ redes</h3>
+          <div class="sub">Reenquadra o vídeo, centralizado.</div>
+          <div class="presets" id="vpresets"></div>
+        </div>
+
+        <button class="btn" id="v-go" disabled style="margin-top:16px">Processar vídeo</button>
+        <div class="progress" id="v-prog" style="display:none"><i></i></div>
+        <div class="status" id="v-status"></div>
+        <div class="log" id="v-log"></div>
+        <button class="btn ghost" id="v-dl" style="margin-top:10px;display:none">Baixar resultado</button>
+        <div class="meta" id="v-meta"></div>
+      </div>
+    </div>
+  </div>
 
   </div>
 </main>
 
 <footer>
   <div class="wrap foot-in">
-    <span>Oficina de Mídia — processamento 100% local, suas imagens não saem do navegador.</span>
+    <span>Oficina de Mídia — processamento 100% local, suas mídias não saem do navegador.</span>
     <span>Feito por mkbraion</span>
   </div>
 </footer>
@@ -269,35 +407,49 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" async></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" async></script>
+<script src="vendor/ffmpeg/ffmpeg.js"></script>
+<script src="vendor/util/index.js"></script>
 <script>
 (function(){
   "use strict";
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
 
-  // ---------- shared state ----------
-  const state = { img:null, name:"imagem", w:0, h:0, srcSize:0 };
-
   function toast(msg){
     const t=$("#toast"); t.textContent=msg; t.classList.add("show");
-    clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1800);
+    clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),2200);
   }
   function fmtBytes(b){
     if(b<1024) return b+" B";
     if(b<1048576) return (b/1024).toFixed(0)+" KB";
     return (b/1048576).toFixed(2)+" MB";
   }
-  function baseName(n){ return (n||"imagem").replace(/\.[^.]+$/,""); }
+  function baseName(n){ return (n||"arquivo").replace(/\.[^.]+$/,""); }
   function extFor(mime){ return mime==="image/png"?"png":mime==="image/webp"?"webp":"jpg"; }
-
   function download(blob, filename){
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
     a.href=url; a.download=filename; document.body.appendChild(a); a.click();
     a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
   }
+  function pct(cur,orig){
+    return cur<=orig ? `−${Math.round((1-cur/orig)*100)}%` : `+${Math.round((cur/orig-1)*100)}%`;
+  }
 
-  // ---------- load image ----------
+  // ===================== VIEW SWITCH =====================
+  $$(".seg button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      $$(".seg button").forEach(x=>x.setAttribute("aria-selected","false"));
+      b.setAttribute("aria-selected","true");
+      $$(".view").forEach(v=>v.classList.remove("active"));
+      $("#view-"+b.dataset.view).classList.add("active");
+    });
+  });
+
+  // ===================== IMAGE: single =====================
+  const state = { img:null, name:"imagem", w:0, h:0, srcSize:0 };
+
   function loadFile(file){
     if(!file || !file.type.startsWith("image/")){ toast("Escolha um arquivo de imagem."); return; }
     state.name = baseName(file.name);
@@ -306,31 +458,22 @@
     const img = new Image();
     img.onload = () => {
       state.img=img; state.w=img.naturalWidth; state.h=img.naturalHeight;
-      URL.revokeObjectURL(url);
-      onImageReady();
+      URL.revokeObjectURL(url); onImageReady();
     };
     img.onerror = ()=>{ toast("Não consegui abrir essa imagem."); URL.revokeObjectURL(url); };
     img.src = url;
   }
-
   function onImageReady(){
-    // enable buttons
     $("#c-go").disabled=false; $("#cr-go").disabled=false; $("#o-go").disabled=false;
-    // convert defaults
     $("#c-w").value=state.w; $("#c-h").value=state.h;
-    renderConvert();
-    renderCropPreview();
-    // ocr preview
+    renderConvert(); renderCropPreview();
     showInStage("#stage-ocr", state.img);
     $("#drop").querySelector("strong").textContent = state.name + " carregada";
   }
-
   function showInStage(sel, node){
-    const st=$(sel); st.innerHTML="";
-    if(node.tagName==="CANVAS"||node.tagName==="IMG"){ st.appendChild(node); }
+    const st=$(sel); st.innerHTML=""; st.appendChild(node);
   }
 
-  // ---------- dropzone ----------
   const drop=$("#drop"), fileInput=$("#file");
   drop.addEventListener("click",()=>fileInput.click());
   fileInput.addEventListener("change",e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); });
@@ -338,175 +481,327 @@
   ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
   drop.addEventListener("drop",e=>{ const f=e.dataTransfer.files[0]; if(f) loadFile(f); });
   window.addEventListener("paste",e=>{
-    const items=e.clipboardData && e.clipboardData.items;
-    if(!items) return;
+    const items=e.clipboardData && e.clipboardData.items; if(!items) return;
     for(const it of items){ if(it.type.startsWith("image/")){ loadFile(it.getAsFile()); break; } }
   });
 
-  // ---------- tabs ----------
-  $$(".tab").forEach(tab=>{
+  // image tabs
+  $$("#view-img .tab").forEach(tab=>{
     tab.addEventListener("click",()=>{
-      $$(".tab").forEach(t=>t.setAttribute("aria-selected","false"));
+      $$("#view-img .tab").forEach(t=>t.setAttribute("aria-selected","false"));
       tab.setAttribute("aria-selected","true");
-      $$(".panel").forEach(p=>p.classList.remove("active"));
+      $$("#view-img .panel").forEach(p=>p.classList.remove("active"));
       $("#panel-"+tab.dataset.tab).classList.add("active");
+      // single dropzone only for convert/crop/ocr
+      drop.style.display = tab.dataset.tab==="batch" ? "none" : "block";
     });
   });
 
-  // ---------- CONVERT ----------
+  // convert
   const cW=$("#c-w"), cH=$("#c-h"), cLock=$("#c-lock");
   const cFormat=$("#c-format"), cQ=$("#c-quality"), cQwrap=$("#c-quality-wrap"), cQval=$("#c-quality-val");
-
   function aspect(){ return state.w/state.h; }
   cW.addEventListener("input",()=>{ if(cLock.checked && state.img && cW.value){ cH.value=Math.round(cW.value/aspect()); } renderConvert(); });
   cH.addEventListener("input",()=>{ if(cLock.checked && state.img && cH.value){ cW.value=Math.round(cH.value*aspect()); } renderConvert(); });
   cLock.addEventListener("change",()=>{ if(cLock.checked && cW.value){ cH.value=Math.round(cW.value/aspect()); renderConvert(); } });
   cQ.addEventListener("input",()=>{ cQval.textContent=cQ.value+"%"; renderConvert(); });
-  cFormat.addEventListener("change",()=>{
-    cQwrap.style.display = cFormat.value==="image/png" ? "none":"block";
-    renderConvert();
-  });
+  cFormat.addEventListener("change",()=>{ cQwrap.style.display = cFormat.value==="image/png"?"none":"block"; renderConvert(); });
 
   let convertBlob=null, convertToken=0;
-  function targetDims(){
-    let w=parseInt(cW.value)||state.w, h=parseInt(cH.value)||state.h;
-    w=Math.max(1,w); h=Math.max(1,h);
-    return {w,h};
-  }
-  function drawTo(w,h){
+  function targetDims(){ let w=parseInt(cW.value)||state.w, h=parseInt(cH.value)||state.h; return {w:Math.max(1,w),h:Math.max(1,h)}; }
+  function drawTo(w,h,fmt){
     const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
-    const ctx=cv.getContext("2d");
-    ctx.imageSmoothingQuality="high";
-    if(cFormat.value==="image/jpeg"){ ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); }
-    ctx.drawImage(state.img,0,0,w,h);
-    return cv;
+    const ctx=cv.getContext("2d"); ctx.imageSmoothingQuality="high";
+    if(fmt==="image/jpeg"){ ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); }
+    ctx.drawImage(state.img,0,0,w,h); return cv;
   }
   function renderConvert(){
     if(!state.img) return;
-    const token=++convertToken;
-    const {w,h}=targetDims();
-    const cv=drawTo(w,h);
-    showInStage("#stage-convert",cv);
+    const token=++convertToken; const {w,h}=targetDims();
+    const cv=drawTo(w,h,cFormat.value); showInStage("#stage-convert",cv);
     const q=cFormat.value==="image/png"?undefined:cQ.value/100;
     cv.toBlob(blob=>{
-      if(token!==convertToken) return;
-      convertBlob=blob;
-      const delta = blob.size<=state.srcSize
-        ? `<b>−${Math.round((1-blob.size/state.srcSize)*100)}%</b> vs. original`
-        : `<b>+${Math.round((blob.size/state.srcSize-1)*100)}%</b> vs. original`;
+      if(token!==convertToken) return; convertBlob=blob;
       $("#c-meta").innerHTML =
         `Original: <b>${state.w}×${state.h}</b> · ${fmtBytes(state.srcSize)}<br>`+
-        `Saída: <b>${w}×${h}</b> · ${extFor(cFormat.value).toUpperCase()} · ${fmtBytes(blob.size)} · ${delta}`;
+        `Saída: <b>${w}×${h}</b> · ${extFor(cFormat.value).toUpperCase()} · ${fmtBytes(blob.size)} · <b>${pct(blob.size,state.srcSize)}</b> vs. original`;
     }, cFormat.value, q);
   }
-  $("#c-go").addEventListener("click",()=>{
-    if(!convertBlob) return;
-    download(convertBlob, state.name+"."+extFor(cFormat.value));
-    toast("Baixando…");
-  });
+  $("#c-go").addEventListener("click",()=>{ if(convertBlob){ download(convertBlob, state.name+"."+extFor(cFormat.value)); toast("Baixando…"); } });
 
-  // ---------- CROP ----------
+  // crop
   const PRESETS=[
-    {name:"Instagram — Post",  w:1080,h:1080},
-    {name:"Instagram — Retrato",w:1080,h:1350},
-    {name:"Story / Reels",     w:1080,h:1920},
-    {name:"YouTube — Thumb",   w:1280,h:720},
-    {name:"Paisagem 16:9",     w:1920,h:1080},
-    {name:"X / Twitter",       w:1600,h:900},
-    {name:"Facebook — Capa",   w:1640,h:924},
-    {name:"LinkedIn — Capa",   w:1584,h:396},
+    {name:"Instagram — Post",w:1080,h:1080},{name:"Instagram — Retrato",w:1080,h:1350},
+    {name:"Story / Reels",w:1080,h:1920},{name:"YouTube — Thumb",w:1280,h:720},
+    {name:"Paisagem 16:9",w:1920,h:1080},{name:"X / Twitter",w:1600,h:900},
+    {name:"Facebook — Capa",w:1640,h:924},{name:"LinkedIn — Capa",w:1584,h:396},
   ];
-  let cropSel=0, cropBlob=null;
+  let cropSel=0, cropBlob=null, cropToken=0;
   const presetsBox=$("#presets");
   PRESETS.forEach((p,i)=>{
     const b=document.createElement("button");
     b.className="preset"; b.setAttribute("aria-pressed", i===0?"true":"false");
     b.innerHTML=`<div class="p-name">${p.name}</div><div class="p-dim">${p.w}×${p.h}</div>`;
     b.addEventListener("click",()=>{ cropSel=i;
-      $$(".preset").forEach(x=>x.setAttribute("aria-pressed","false"));
+      $$("#presets .preset").forEach(x=>x.setAttribute("aria-pressed","false"));
       b.setAttribute("aria-pressed","true"); renderCropPreview(); });
     presetsBox.appendChild(b);
   });
   $("#cr-format").addEventListener("change",renderCropPreview);
-
   function cropCanvas(){
-    const p=PRESETS[cropSel];
-    const tR=p.w/p.h, sR=state.w/state.h;
-    let sw,sh,sx,sy;
+    const p=PRESETS[cropSel]; const tR=p.w/p.h, sR=state.w/state.h; let sw,sh,sx,sy;
     if(sR>tR){ sh=state.h; sw=Math.round(sh*tR); sx=Math.round((state.w-sw)/2); sy=0; }
     else{ sw=state.w; sh=Math.round(sw/tR); sx=0; sy=Math.round((state.h-sh)/2); }
     const cv=document.createElement("canvas"); cv.width=p.w; cv.height=p.h;
     const ctx=cv.getContext("2d"); ctx.imageSmoothingQuality="high";
     const fmt=$("#cr-format").value;
     if(fmt==="image/jpeg"){ ctx.fillStyle="#fff"; ctx.fillRect(0,0,p.w,p.h); }
-    ctx.drawImage(state.img,sx,sy,sw,sh,0,0,p.w,p.h);
-    return cv;
+    ctx.drawImage(state.img,sx,sy,sw,sh,0,0,p.w,p.h); return cv;
   }
-  let cropToken=0;
   function renderCropPreview(){
     if(!state.img) return;
-    const token=++cropToken;
-    const p=PRESETS[cropSel];
-    const cv=cropCanvas();
-    showInStage("#stage-crop",cv);
-    const fmt=$("#cr-format").value;
-    const q=fmt==="image/png"?undefined:.9;
-    cv.toBlob(blob=>{
-      if(token!==cropToken) return; // ignora render antigo
-      cropBlob=blob;
+    const token=++cropToken; const p=PRESETS[cropSel]; const cv=cropCanvas();
+    showInStage("#stage-crop",cv); const fmt=$("#cr-format").value; const q=fmt==="image/png"?undefined:.9;
+    cv.toBlob(blob=>{ if(token!==cropToken) return; cropBlob=blob;
       $("#cr-meta").innerHTML=`Saída: <b>${p.w}×${p.h}</b> · ${extFor(fmt).toUpperCase()} · ${fmtBytes(blob.size)}`;
     },fmt,q);
   }
-  $("#cr-go").addEventListener("click",()=>{
-    if(!cropBlob) return;
-    const p=PRESETS[cropSel];
-    download(cropBlob, `${state.name}-${p.w}x${p.h}.${extFor($("#cr-format").value)}`);
-    toast("Baixando…");
+  $("#cr-go").addEventListener("click",()=>{ if(cropBlob){ const p=PRESETS[cropSel];
+    download(cropBlob, `${state.name}-${p.w}x${p.h}.${extFor($("#cr-format").value)}`); toast("Baixando…"); } });
+
+  // ===================== IMAGE: batch =====================
+  const bDrop=$("#drop-batch"), bInput=$("#file-batch");
+  const bFormat=$("#b-format"), bQ=$("#b-quality"), bQwrap=$("#b-quality-wrap"), bQval=$("#b-quality-val"), bMaxW=$("#b-maxw");
+  let batchFiles=[], batchResults=[];
+  bDrop.addEventListener("click",()=>bInput.click());
+  bInput.addEventListener("change",e=>{ addBatch(e.target.files); });
+  ["dragenter","dragover"].forEach(ev=>bDrop.addEventListener(ev,e=>{e.preventDefault();bDrop.classList.add("over");}));
+  ["dragleave","drop"].forEach(ev=>bDrop.addEventListener(ev,e=>{e.preventDefault();bDrop.classList.remove("over");}));
+  bDrop.addEventListener("drop",e=>{ addBatch(e.dataTransfer.files); });
+  bQ.addEventListener("input",()=>{ bQval.textContent=bQ.value+"%"; });
+  bFormat.addEventListener("change",()=>{ bQwrap.style.display=bFormat.value==="image/png"?"none":"block"; });
+  function addBatch(list){
+    const imgs=Array.from(list).filter(f=>f.type.startsWith("image/"));
+    if(!imgs.length){ toast("Escolha imagens."); return; }
+    batchFiles=batchFiles.concat(imgs);
+    $("#b-go").disabled=false;
+    bDrop.querySelector("strong").textContent = batchFiles.length+" imagem(ns) na fila";
+    $("#b-meta").textContent = "Pronto para comprimir "+batchFiles.length+" imagem(ns).";
+  }
+  function loadImg(file){
+    return new Promise((res,rej)=>{ const url=URL.createObjectURL(file); const im=new Image();
+      im.onload=()=>{URL.revokeObjectURL(url);res(im);}; im.onerror=()=>{URL.revokeObjectURL(url);rej();}; im.src=url; });
+  }
+  $("#b-go").addEventListener("click",async()=>{
+    if(!batchFiles.length) return;
+    $("#b-go").disabled=true; $("#b-zip").style.display="none";
+    const prog=$("#b-prog"); prog.style.display="block"; const bar=prog.querySelector("i"); bar.style.width="0%";
+    const listEl=$("#batchlist"); listEl.style.display="block"; listEl.innerHTML="";
+    batchResults=[]; const fmt=bFormat.value; const q=fmt==="image/png"?undefined:bQ.value/100;
+    const maxw=parseInt(bMaxW.value)||0; let totIn=0, totOut=0;
+    for(let i=0;i<batchFiles.length;i++){
+      const f=batchFiles[i];
+      try{
+        const im=await loadImg(f);
+        let w=im.naturalWidth,h=im.naturalHeight;
+        if(maxw && w>maxw){ h=Math.round(h*maxw/w); w=maxw; }
+        const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+        const ctx=cv.getContext("2d"); ctx.imageSmoothingQuality="high";
+        if(fmt==="image/jpeg"){ ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); }
+        ctx.drawImage(im,0,0,w,h);
+        const blob=await new Promise(r=>cv.toBlob(r,fmt,q));
+        const name=baseName(f.name)+"."+extFor(fmt);
+        batchResults.push({name,blob});
+        totIn+=f.size; totOut+=blob.size;
+        const row=document.createElement("div"); row.className="brow";
+        const up=blob.size>f.size;
+        row.innerHTML=`<img src="${URL.createObjectURL(blob)}" alt=""><span class="bname">${name}</span>`+
+          `<span class="bsize">${fmtBytes(f.size)} → ${fmtBytes(blob.size)}</span>`+
+          `<span class="bdelta ${up?'up':''}">${pct(blob.size,f.size)}</span>`;
+        const dlb=document.createElement("button"); dlb.className="btn ghost sm"; dlb.textContent="Baixar";
+        dlb.style.width="auto"; dlb.onclick=()=>download(blob,name); row.appendChild(dlb);
+        listEl.appendChild(row);
+      }catch(e){ /* pula imagem inválida */ }
+      bar.style.width=Math.round((i+1)/batchFiles.length*100)+"%";
+    }
+    $("#b-meta").innerHTML = `<b>${batchResults.length}</b> imagens · total ${fmtBytes(totIn)} → <b>${fmtBytes(totOut)}</b> · <b>${pct(totOut,totIn)}</b>`;
+    $("#b-go").disabled=false;
+    if(batchResults.length){ $("#b-zip").style.display = (typeof JSZip!=="undefined")?"block":"none"; }
+    setTimeout(()=>{prog.style.display="none";},600);
+    toast("Lote comprimido!");
+  });
+  $("#b-zip").addEventListener("click",async()=>{
+    if(typeof JSZip==="undefined"){ toast("Biblioteca ZIP não carregou."); return; }
+    if(!batchResults.length) return;
+    const zip=new JSZip();
+    batchResults.forEach(r=>zip.file(r.name, r.blob));
+    const blob=await zip.generateAsync({type:"blob"});
+    download(blob,"imagens-comprimidas.zip"); toast("Baixando .zip…");
   });
 
-  // ---------- OCR ----------
-  const oGo=$("#o-go"), oProg=$("#o-prog"), oProgBar=oProg.querySelector("i"),
-        oStatus=$("#o-status"), oOut=$("#o-out");
+  // ===================== OCR =====================
+  const oGo=$("#o-go"), oProg=$("#o-prog"), oProgBar=$("#o-prog").querySelector("i"), oStatus=$("#o-status"), oOut=$("#o-out");
   oGo.addEventListener("click",async()=>{
-    if(!state.img){ return; }
+    if(!state.img) return;
     if(typeof Tesseract==="undefined"){ toast("Biblioteca OCR não carregou. Verifique a conexão."); return; }
-    oGo.disabled=true; oProg.style.display="block"; oProgBar.style.width="0%";
-    oStatus.textContent="Preparando…"; oOut.value="";
-    // desenha num canvas para não depender da URL da imagem (que pode estar revogada)
-    const ocv=document.createElement("canvas"); ocv.width=state.w; ocv.height=state.h;
-    ocv.getContext("2d").drawImage(state.img,0,0);
+    oGo.disabled=true; oProg.style.display="block"; oProgBar.style.width="0%"; oStatus.textContent="Preparando…"; oOut.value="";
+    const ocv=document.createElement("canvas"); ocv.width=state.w; ocv.height=state.h; ocv.getContext("2d").drawImage(state.img,0,0);
     const label={ "loading tesseract core":"Carregando motor…","initializing tesseract":"Iniciando…",
-      "loading language traineddata":"Baixando idioma…","initializing api":"Preparando…",
-      "recognizing text":"Lendo texto…" };
+      "loading language traineddata":"Baixando idioma…","initializing api":"Preparando…","recognizing text":"Lendo texto…" };
     try{
       const {data}=await Tesseract.recognize(ocv, $("#o-lang").value, {
         workerPath:"https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js",
         corePath:"https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-simd.wasm.js",
         langPath:"https://cdn.jsdelivr.net/gh/naptha/tessdata@gh-pages/4.0.0",
-        logger:m=>{
-          if(m.status){ oStatus.textContent=(label[m.status]||m.status); }
-          if(typeof m.progress==="number"){ oProgBar.style.width=Math.round(m.progress*100)+"%"; }
-        }
+        logger:m=>{ if(m.status){oStatus.textContent=(label[m.status]||m.status);} if(typeof m.progress==="number"){oProgBar.style.width=Math.round(m.progress*100)+"%";} }
       });
       oOut.value=(data.text||"").trim();
       oStatus.textContent = oOut.value ? "Pronto." : "Nenhum texto reconhecido.";
       if(oOut.value) toast("Texto extraído!");
-    }catch(err){
-      oStatus.textContent="Erro ao processar: "+(err.message||err);
-    }finally{
-      oGo.disabled=false;
-      setTimeout(()=>{ oProg.style.display="none"; },600);
+    }catch(err){ oStatus.textContent="Erro ao processar: "+(err.message||err); }
+    finally{ oGo.disabled=false; setTimeout(()=>{oProg.style.display="none";},600); }
+  });
+  $("#o-copy").addEventListener("click",async()=>{ if(!oOut.value){toast("Nada para copiar.");return;}
+    try{ await navigator.clipboard.writeText(oOut.value); toast("Copiado!"); }catch{ oOut.select(); document.execCommand("copy"); toast("Copiado!"); } });
+  $("#o-txt").addEventListener("click",()=>{ if(!oOut.value){toast("Nada para baixar.");return;}
+    download(new Blob([oOut.value],{type:"text/plain;charset=utf-8"}), state.name+".txt"); });
+
+  // ===================== VIDEO =====================
+  const vState={ file:null, name:"video", url:null, dur:0, w:0, h:0 };
+  let vtab="vcompress", vCropSel=0, vOutBlob=null, ffmpeg=null, ffLoaded=false;
+  const VPRESETS=[
+    {name:"Story / Reels 9:16",r:9/16},{name:"Feed 1:1",r:1},
+    {name:"Retrato 4:5",r:4/5},{name:"Paisagem 16:9",r:16/9},
+  ];
+
+  // video tabs
+  $$("#view-vid .tab").forEach(tab=>{
+    tab.addEventListener("click",()=>{
+      $$("#view-vid .tab").forEach(t=>t.setAttribute("aria-selected","false"));
+      tab.setAttribute("aria-selected","true"); vtab=tab.dataset.vtab;
+      ["vcompress","vconvert","vtrim","vcrop"].forEach(k=>{ $("#vp-"+k).style.display = k===vtab?"block":"none"; });
+    });
+  });
+  // video crop presets
+  const vpresetsBox=$("#vpresets");
+  VPRESETS.forEach((p,i)=>{
+    const b=document.createElement("button"); b.className="preset"; b.setAttribute("aria-pressed", i===0?"true":"false");
+    b.innerHTML=`<div class="p-name">${p.name}</div>`;
+    b.addEventListener("click",()=>{ vCropSel=i; $$("#vpresets .preset").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); });
+    vpresetsBox.appendChild(b);
+  });
+  $("#vv-format").addEventListener("change",()=>{
+    const f=$("#vv-format").value;
+    const notes={ webm:"WebM (VP8) — pode demorar um pouco mais que MP4.", gif:"GIF fica grande; a saída usa 10 fps e 480px de largura.", avi:"AVI/MPEG-4 é menos eficiente; use MP4 quando possível.", mp3:"Extrai só o áudio — o vídeo precisa ter faixa de som." };
+    $("#vv-note").textContent = notes[f]||"";
+  });
+
+  const vDrop=$("#drop-video"), vInput=$("#file-video");
+  vDrop.addEventListener("click",()=>vInput.click());
+  vInput.addEventListener("change",e=>{ if(e.target.files[0]) loadVideo(e.target.files[0]); });
+  ["dragenter","dragover"].forEach(ev=>vDrop.addEventListener(ev,e=>{e.preventDefault();vDrop.classList.add("over");}));
+  ["dragleave","drop"].forEach(ev=>vDrop.addEventListener(ev,e=>{e.preventDefault();vDrop.classList.remove("over");}));
+  vDrop.addEventListener("drop",e=>{ const f=e.dataTransfer.files[0]; if(f) loadVideo(f); });
+
+  function loadVideo(file){
+    if(!file.type.startsWith("video/")){ toast("Escolha um arquivo de vídeo."); return; }
+    if(vState.url) URL.revokeObjectURL(vState.url);
+    vState.file=file; vState.name=baseName(file.name); vState.url=URL.createObjectURL(file);
+    const v=document.createElement("video"); v.src=vState.url; v.controls=true; v.playsInline=true;
+    v.onloadedmetadata=()=>{ vState.dur=v.duration; vState.w=v.videoWidth; vState.h=v.videoHeight;
+      if(!$("#vt-end").value) $("#vt-end").value=Math.round(v.duration*10)/10;
+      $("#v-meta").innerHTML=`Original: <b>${v.videoWidth}×${v.videoHeight}</b> · ${vState.dur.toFixed(1)}s · ${fmtBytes(file.size)}`;
+    };
+    const st=$("#stage-video"); st.innerHTML=""; st.appendChild(v);
+    $("#v-go").disabled=false; vDrop.querySelector("strong").textContent=vState.name+" carregado";
+    if(file.size>500*1024*1024) toast("Vídeo grande (>500 MB) pode falhar por memória no navegador.");
+  }
+
+  async function ensureFFmpeg(){
+    if(ffLoaded) return true;
+    if(typeof FFmpegWASM==="undefined"||typeof FFmpegUtil==="undefined"){ toast("Biblioteca de vídeo não carregou. Verifique a conexão."); return false; }
+    setV("Carregando motor de vídeo (uma vez)…",0);
+    ffmpeg=new FFmpegWASM.FFmpeg();
+    ffmpeg.on("log",({message})=>{ const l=$("#v-log"); l.style.display="block"; l.textContent=(l.textContent+"\n"+message).split("\n").slice(-200).join("\n"); l.scrollTop=l.scrollHeight; });
+    ffmpeg.on("progress",({progress})=>{ if(progress>=0&&progress<=1) setBar(Math.round(progress*100)); });
+    const base=location.origin+"/vendor/core";
+    await ffmpeg.load({
+      coreURL: `${base}/ffmpeg-core.js`,
+      wasmURL: `${base}/ffmpeg-core.wasm`,
+    });
+    ffLoaded=true; return true;
+  }
+  function setV(msg,p){ $("#v-status").textContent=msg; const pr=$("#v-prog"); pr.style.display="block"; if(typeof p==="number") pr.querySelector("i").style.width=p+"%"; }
+  function setBar(p){ $("#v-prog").querySelector("i").style.width=p+"%"; }
+
+  function buildArgs(inName,outName){
+    if(vtab==="vcompress"){
+      const crf=$("#vc-level").value, res=parseInt($("#vc-res").value)||0;
+      const a=["-i",inName,"-c:v","libx264","-crf",crf,"-preset","veryfast","-pix_fmt","yuv420p"];
+      if(res) a.push("-vf",`scale=-2:${res}`);
+      a.push("-c:a","aac","-b:a","128k",outName); return a;
     }
+    if(vtab==="vconvert"){
+      const f=$("#vv-format").value;
+      if(f==="mp4") return ["-i",inName,"-c:v","libx264","-crf","26","-preset","veryfast","-pix_fmt","yuv420p","-c:a","aac","-b:a","128k",outName];
+      if(f==="webm") return ["-i",inName,"-c:v","libvpx","-crf","12","-b:v","2M","-c:a","libvorbis",outName];
+      if(f==="gif") return ["-i",inName,"-vf","fps=10,scale=480:-1:flags=lanczos",outName];
+      if(f==="mkv") return ["-i",inName,"-c:v","libx264","-crf","26","-preset","veryfast","-c:a","aac","-b:a","128k",outName];
+      if(f==="mov") return ["-i",inName,"-c:v","libx264","-crf","26","-preset","veryfast","-pix_fmt","yuv420p","-c:a","aac","-b:a","128k",outName];
+      if(f==="avi") return ["-i",inName,"-c:v","mpeg4","-qscale:v","4","-c:a","libmp3lame","-q:a","4",outName];
+      if(f==="mp3") return ["-i",inName,"-vn","-c:a","libmp3lame","-q:a","2",outName];
+    }
+    if(vtab==="vtrim"){
+      const s=parseFloat($("#vt-start").value)||0, e=parseFloat($("#vt-end").value)||vState.dur;
+      const re=$("#vt-reencode").checked;
+      if(re) return ["-ss",String(s),"-to",String(e),"-i",inName,"-c:v","libx264","-crf","23","-preset","veryfast","-c:a","aac",outName];
+      return ["-ss",String(s),"-to",String(e),"-i",inName,"-c","copy",outName];
+    }
+    if(vtab==="vcrop"){
+      const R=VPRESETS[vCropSel].r;
+      const cropf=`crop=min(iw\\,ih*${R}):min(ih\\,iw/${R})`;
+      return ["-i",inName,"-vf",cropf,"-c:v","libx264","-crf","23","-preset","veryfast","-pix_fmt","yuv420p","-c:a","aac","-b:a","128k",outName];
+    }
+    return ["-i",inName,outName];
+  }
+  function outInfo(){
+    if(vtab==="vconvert"){ const f=$("#vv-format").value; const mimes={mp4:"video/mp4",webm:"video/webm",gif:"image/gif",mkv:"video/x-matroska",mov:"video/quicktime",avi:"video/x-msvideo",mp3:"audio/mpeg"}; return {ext:f,mime:mimes[f]}; }
+    if(vtab==="vcrop") return {ext:"mp4",mime:"video/mp4"};
+    if(vtab==="vtrim"){ const ext=(vState.name&&vState.file.name.split(".").pop())||"mp4"; return {ext:$("#vt-reencode").checked?"mp4":ext,mime:"video/mp4"}; }
+    return {ext:"mp4",mime:"video/mp4"};
+  }
+  function inExt(){ const p=vState.file.name.split("."); return p.length>1?p.pop().toLowerCase():"mp4"; }
+
+  $("#v-go").addEventListener("click",async()=>{
+    if(!vState.file) return;
+    $("#v-go").disabled=true; vOutBlob=null; $("#v-dl").style.display="none"; $("#v-log").textContent="";
+    try{
+      if(!await ensureFFmpeg()){ $("#v-go").disabled=false; return; }
+      const inName="in."+inExt(); const oi=outInfo(); const outName="out."+oi.ext;
+      setV("Preparando arquivo…",0);
+      await ffmpeg.writeFile(inName, await FFmpegUtil.fetchFile(vState.file));
+      setV("Processando… (pode levar um tempo)",0);
+      await ffmpeg.exec(buildArgs(inName,outName));
+      const data=await ffmpeg.readFile(outName);
+      vOutBlob=new Blob([data.buffer],{type:oi.mime});
+      try{ await ffmpeg.deleteFile(inName); await ffmpeg.deleteFile(outName); }catch(e){}
+      const st=$("#stage-video");
+      if(oi.mime.startsWith("video/")){ const v=document.createElement("video"); v.src=URL.createObjectURL(vOutBlob); v.controls=true; v.playsInline=true; st.innerHTML=""; st.appendChild(v); }
+      else if(oi.mime==="image/gif"){ const im=new Image(); im.src=URL.createObjectURL(vOutBlob); st.innerHTML=""; st.appendChild(im); }
+      $("#v-status").textContent="Pronto.";
+      $("#v-meta").innerHTML += `<br>Saída: <b>${oi.ext.toUpperCase()}</b> · ${fmtBytes(vOutBlob.size)} · <b>${pct(vOutBlob.size,vState.file.size)}</b> vs. original`;
+      $("#v-dl").style.display="block"; $("#v-dl").dataset.name=vState.name+"-oficina."+oi.ext;
+      toast("Vídeo pronto!");
+    }catch(err){
+      const raw=(err&&err.message?err.message:String(err));
+      let msg=raw;
+      if(vtab==="vconvert" && $("#vv-format").value==="mp3") msg="Não deu para extrair áudio — o vídeo pode não ter faixa de som.";
+      else if(/memory access|out of bounds|OOM|Aborted/i.test(raw)) msg="Faltou memória no navegador — tente uma resolução menor ou um vídeo mais curto.";
+      $("#v-status").textContent="Erro: "+msg;
+      toast("Falhou ao processar o vídeo.");
+    }finally{ $("#v-go").disabled=false; setTimeout(()=>{$("#v-prog").style.display="none";},800); }
   });
-  $("#o-copy").addEventListener("click",async()=>{
-    if(!oOut.value){ toast("Nada para copiar."); return; }
-    try{ await navigator.clipboard.writeText(oOut.value); toast("Copiado!"); }
-    catch{ oOut.select(); document.execCommand("copy"); toast("Copiado!"); }
-  });
-  $("#o-txt").addEventListener("click",()=>{
-    if(!oOut.value){ toast("Nada para baixar."); return; }
-    download(new Blob([oOut.value],{type:"text/plain;charset=utf-8"}), state.name+".txt");
-  });
+  $("#v-dl").addEventListener("click",()=>{ if(vOutBlob) download(vOutBlob, $("#v-dl").dataset.name||("video-oficina."+outInfo().ext)); });
 
 })();
 </script>
