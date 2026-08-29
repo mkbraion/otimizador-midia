@@ -413,9 +413,9 @@
     <div id="yt-block" style="display:none">
       <div class="controls" style="max-width:640px;margin:22px auto 0">
         <h3>Baixar do YouTube</h3>
-        <div class="sub">Precisa do seu servidor (yt-dlp) rodando — cole o endereço dele abaixo. O download acontece direto do seu servidor para o seu aparelho.</div>
-        <div class="field">
-          <label class="lbl">Endereço do seu servidor</label>
+        <div class="sub">Cole o link do vídeo e escolha a qualidade. Até 4K ou só o áudio.</div>
+        <div class="field" id="yt-backend-field" style="display:none">
+          <label class="lbl">Endereço do servidor (avançado)</label>
           <input type="text" id="yt-backend" placeholder="https://seu-servidor.up.railway.app" spellcheck="false">
         </div>
         <div class="field">
@@ -854,11 +854,12 @@
   });
   $("#v-dl").addEventListener("click",()=>{ if(vOutBlob) download(vOutBlob, $("#v-dl").dataset.name||("video-oficina."+outInfo().ext)); });
 
-  // ===================== YOUTUBE (backend próprio) =====================
+  // ===================== YOUTUBE =====================
+  const DEFAULT_BACKEND="https://otimizador-midia-yt-backend-production.up.railway.app";
   const ytBackend=$("#yt-backend"), ytUrl=$("#yt-url"); let ytData=null;
-  try{ const saved=localStorage.getItem("ofm_backend"); if(saved) ytBackend.value=saved; }catch(e){}
+  try{ const saved=localStorage.getItem("ofm_backend"); ytBackend.value = saved || DEFAULT_BACKEND; }catch(e){ ytBackend.value=DEFAULT_BACKEND; }
   ytBackend.addEventListener("change",()=>{ try{ localStorage.setItem("ofm_backend", ytBackend.value.trim()); }catch(e){} });
-  function backendBase(){ return (ytBackend.value||"").trim().replace(/\/+$/,""); }
+  function backendBase(){ return ((ytBackend.value||"").trim()||DEFAULT_BACKEND).replace(/\/+$/,""); }
   function fmtDur(s){ s=Math.round(s||0); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
 
   $("#yt-fetch").addEventListener("click",async()=>{
