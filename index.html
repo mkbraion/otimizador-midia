@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oficina de Mídia — converter, cortar e extrair texto</title>
+<meta name="description" content="Ferramenta rápida no navegador para converter formatos de imagem, cortar para redes sociais e extrair texto (OCR). Nada é enviado para servidores.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4f1ea;
+    --paper-2:#efeae0;
+    --card:#fbfaf6;
+    --ink:#1b1917;
+    --ink-2:#5c574f;
+    --ink-3:#8a8378;
+    --line:#ddd6c8;
+    --line-strong:#c9c0ae;
+    --accent:#b4502e;
+    --accent-ink:#8f3d21;
+    --ok:#3f6b4f;
+    --shadow:0 1px 2px rgba(27,25,23,.05), 0 8px 24px rgba(27,25,23,.06);
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+
+  /* Header */
+  header{border-bottom:1px solid var(--line);background:var(--paper)}
+  .head-in{display:flex;align-items:baseline;gap:14px;padding:22px 0 20px;flex-wrap:wrap}
+  .logo{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:22px;letter-spacing:-.01em}
+  .logo b{color:var(--accent)}
+  .tag{color:var(--ink-2);font-size:14px;margin-left:auto}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);
+    border:1px solid var(--line);background:var(--card);padding:5px 10px;border-radius:100px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block}
+
+  /* Tabs */
+  nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:4px;overflow-x:auto}
+  .tab{appearance:none;border:0;background:none;font:inherit;font-weight:500;font-size:14.5px;
+    color:var(--ink-2);padding:12px 14px;cursor:pointer;border-bottom:2px solid transparent;
+    margin-bottom:-1px;white-space:nowrap}
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+  main{padding:26px 0 60px}
+  .panel{display:none}
+  .panel.active{display:block}
+
+  /* Dropzone */
+  .drop{border:1.5px dashed var(--line-strong);border-radius:var(--radius);background:var(--card);
+    padding:34px 20px;text-align:center;color:var(--ink-2);cursor:pointer;transition:border-color .15s,background .15s}
+  .drop:hover,.drop.over{border-color:var(--accent);background:#fff}
+  .drop strong{color:var(--ink);font-weight:600}
+  .drop .hint{font-size:13px;margin-top:6px;color:var(--ink-3)}
+
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:22px;margin-top:22px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;min-height:220px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+  .stage canvas,.stage img{max-width:100%;max-height:440px;border-radius:6px;display:block}
+  .stage .empty{color:var(--ink-3);font-size:14px;text-align:center}
+
+  .controls{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;box-shadow:var(--shadow)}
+  .controls h3{margin:0 0 4px;font-family:'Fraunces',serif;font-weight:600;font-size:16px}
+  .controls .sub{font-size:12.5px;color:var(--ink-3);margin-bottom:16px}
+  .field{margin-bottom:15px}
+  label.lbl{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--ink-2);font-weight:600;margin-bottom:6px}
+  .row{display:flex;gap:10px}
+  .row .field{flex:1;margin-bottom:0}
+  input[type=number],input[type=text],select{
+    width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line-strong);
+    border-radius:8px;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+
+  .check{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink);cursor:pointer;user-select:none}
+  .check input{width:16px;height:16px;accent-color:var(--accent)}
+
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .rng-val{font-size:12px;color:var(--ink-2);float:right}
+
+  .btn{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;
+    font:inherit;font-weight:600;font-size:14px;padding:11px 16px;border-radius:8px;cursor:pointer;
+    width:100%;transition:background .15s,transform .05s}
+  .btn:hover{background:var(--accent-ink)}
+  .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--ink);border-color:var(--line-strong)}
+  .btn.ghost:hover{border-color:var(--ink-2)}
+  .btn.sm{width:auto;padding:8px 13px;font-size:13px}
+
+  .meta{font-size:12.5px;color:var(--ink-2);margin-top:12px;line-height:1.7}
+  .meta b{color:var(--ink);font-weight:600}
+
+  /* Ratio presets */
+  .presets{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .preset{border:1px solid var(--line-strong);background:#fff;border-radius:8px;padding:10px;
+    cursor:pointer;text-align:left;font:inherit;transition:border-color .12s,background .12s}
+  .preset:hover{border-color:var(--accent)}
+  .preset[aria-pressed="true"]{border-color:var(--accent);background:#fff7f3}
+  .preset .p-name{font-weight:600;font-size:13px}
+  .preset .p-dim{font-size:11.5px;color:var(--ink-3);font-family:'JetBrains Mono',monospace}
+
+  /* OCR */
+  .ocr-out{width:100%;min-height:200px;font:inherit;font-size:14px;padding:12px;
+    border:1px solid var(--line-strong);border-radius:8px;background:#fff;resize:vertical;color:var(--ink)}
+  .progress{height:6px;background:var(--paper-2);border-radius:100px;overflow:hidden;margin:10px 0}
+  .progress > i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+  .status{font-size:12.5px;color:var(--ink-2);min-height:18px}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:100px;font-size:13.5px;
+    opacity:0;pointer-events:none;transition:.25s}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:12.5px;padding:20px 0 34px}
+  .foot-in{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  a{color:var(--accent-ink)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="head-in">
+      <div class="logo">Oficina de <b>Mídia</b></div>
+      <span class="privacy"><span class="dot"></span> Roda no seu navegador — nada é enviado</span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="convert">Converter &amp; redimensionar</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="crop">Cortar para redes</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="ocr">Extrair texto (OCR)</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <!-- global dropzone -->
+    <div class="drop" id="drop">
+      <strong>Arraste uma imagem aqui</strong>, clique para escolher ou cole (Ctrl+V)
+      <div class="hint">JPG, PNG, WEBP, GIF, BMP — a imagem fica só no seu aparelho</div>
+      <input type="file" id="file" accept="image/*" hidden>
+    </div>
+
+    <!-- ===== CONVERT ===== -->
+    <section class="panel active" id="panel-convert">
+      <div class="grid">
+        <div class="stage" id="stage-convert"><div class="empty">A pré-visualização aparece aqui</div></div>
+        <div class="controls">
+          <h3>Converter &amp; redimensionar</h3>
+          <div class="sub">Mude o formato, a qualidade e as dimensões.</div>
+
+          <div class="field">
+            <label class="lbl">Formato de saída</label>
+            <select id="c-format">
+              <option value="image/webp">WEBP — menor arquivo</option>
+              <option value="image/jpeg">JPG — fotos</option>
+              <option value="image/png">PNG — transparência</option>
+            </select>
+          </div>
+
+          <div class="field" id="c-quality-wrap">
+            <label class="lbl">Qualidade <span class="rng-val mono" id="c-quality-val">85%</span></label>
+            <input type="range" id="c-quality" min="30" max="100" value="85">
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label class="lbl">Largura (px)</label>
+              <input type="number" id="c-w" min="1" placeholder="auto">
+            </div>
+            <div class="field">
+              <label class="lbl">Altura (px)</label>
+              <input type="number" id="c-h" min="1" placeholder="auto">
+            </div>
+          </div>
+          <div class="field">
+            <label class="check"><input type="checkbox" id="c-lock" checked> Manter proporção</label>
+          </div>
+
+          <button class="btn" id="c-go" disabled>Baixar imagem</button>
+          <div class="meta" id="c-meta"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CROP ===== -->
+    <section class="panel" id="panel-crop">
+      <div class="grid">
+        <div class="stage" id="stage-crop"><div class="empty">A pré-visualização do corte aparece aqui</div></div>
+        <div class="controls">
+          <h3>Cortar para redes</h3>
+          <div class="sub">Escolhe o formato — corto centralizado, sem distorcer.</div>
+          <div class="presets" id="presets"></div>
+
+          <div class="field" style="margin-top:16px">
+            <label class="lbl">Formato de saída</label>
+            <select id="cr-format">
+              <option value="image/jpeg">JPG</option>
+              <option value="image/webp">WEBP</option>
+              <option value="image/png">PNG</option>
+            </select>
+          </div>
+
+          <button class="btn" id="cr-go" disabled>Baixar corte</button>
+          <div class="meta" id="cr-meta"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== OCR ===== -->
+    <section class="panel" id="panel-ocr">
+      <div class="grid">
+        <div class="stage" id="stage-ocr"><div class="empty">A imagem para leitura aparece aqui</div></div>
+        <div class="controls">
+          <h3>Extrair texto (OCR)</h3>
+          <div class="sub">Lê o texto da imagem. Português + inglês.</div>
+
+          <div class="field">
+            <label class="lbl">Idioma</label>
+            <select id="o-lang">
+              <option value="por+eng">Português + Inglês</option>
+              <option value="por">Português</option>
+              <option value="eng">Inglês</option>
+            </select>
+          </div>
+
+          <button class="btn" id="o-go" disabled>Ler texto da imagem</button>
+          <div class="progress" id="o-prog" style="display:none"><i></i></div>
+          <div class="status" id="o-status"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:18px">
+        <label class="lbl">Texto extraído</label>
+        <textarea class="ocr-out" id="o-out" placeholder="O texto reconhecido aparece aqui…"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn ghost sm" id="o-copy">Copiar texto</button>
+          <button class="btn ghost sm" id="o-txt">Baixar .txt</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <span>Oficina de Mídia — processamento 100% local, suas imagens não saem do navegador.</span>
+    <span>Feito por mkbraion</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" async></script>
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+
+  // ---------- shared state ----------
+  const state = { img:null, name:"imagem", w:0, h:0, srcSize:0 };
+
+  function toast(msg){
+    const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+    clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1800);
+  }
+  function fmtBytes(b){
+    if(b<1024) return b+" B";
+    if(b<1048576) return (b/1024).toFixed(0)+" KB";
+    return (b/1048576).toFixed(2)+" MB";
+  }
+  function baseName(n){ return (n||"imagem").replace(/\.[^.]+$/,""); }
+  function extFor(mime){ return mime==="image/png"?"png":mime==="image/webp"?"webp":"jpg"; }
+
+  function download(blob, filename){
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+    a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }
+
+  // ---------- load image ----------
+  function loadFile(file){
+    if(!file || !file.type.startsWith("image/")){ toast("Escolha um arquivo de imagem."); return; }
+    state.name = baseName(file.name);
+    state.srcSize = file.size;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      state.img=img; state.w=img.naturalWidth; state.h=img.naturalHeight;
+      URL.revokeObjectURL(url);
+      onImageReady();
+    };
+    img.onerror = ()=>{ toast("Não consegui abrir essa imagem."); URL.revokeObjectURL(url); };
+    img.src = url;
+  }
+
+  function onImageReady(){
+    // enable buttons
+    $("#c-go").disabled=false; $("#cr-go").disabled=false; $("#o-go").disabled=false;
+    // convert defaults
+    $("#c-w").value=state.w; $("#c-h").value=state.h;
+    renderConvert();
+    renderCropPreview();
+    // ocr preview
+    showInStage("#stage-ocr", state.img);
+    $("#drop").querySelector("strong").textContent = state.name + " carregada";
+  }
+
+  function showInStage(sel, node){
+    const st=$(sel); st.innerHTML="";
+    if(node.tagName==="CANVAS"||node.tagName==="IMG"){ st.appendChild(node); }
+  }
+
+  // ---------- dropzone ----------
+  const drop=$("#drop"), fileInput=$("#file");
+  drop.addEventListener("click",()=>fileInput.click());
+  fileInput.addEventListener("change",e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); });
+  ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+  drop.addEventListener("drop",e=>{ const f=e.dataTransfer.files[0]; if(f) loadFile(f); });
+  window.addEventListener("paste",e=>{
+    const items=e.clipboardData && e.clipboardData.items;
+    if(!items) return;
+    for(const it of items){ if(it.type.startsWith("image/")){ loadFile(it.getAsFile()); break; } }
+  });
+
+  // ---------- tabs ----------
+  $$(".tab").forEach(tab=>{
+    tab.addEventListener("click",()=>{
+      $$(".tab").forEach(t=>t.setAttribute("aria-selected","false"));
+      tab.setAttribute("aria-selected","true");
+      $$(".panel").forEach(p=>p.classList.remove("active"));
+      $("#panel-"+tab.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ---------- CONVERT ----------
+  const cW=$("#c-w"), cH=$("#c-h"), cLock=$("#c-lock");
+  const cFormat=$("#c-format"), cQ=$("#c-quality"), cQwrap=$("#c-quality-wrap"), cQval=$("#c-quality-val");
+
+  function aspect(){ return state.w/state.h; }
+  cW.addEventListener("input",()=>{ if(cLock.checked && state.img && cW.value){ cH.value=Math.round(cW.value/aspect()); } renderConvert(); });
+  cH.addEventListener("input",()=>{ if(cLock.checked && state.img && cH.value){ cW.value=Math.round(cH.value*aspect()); } renderConvert(); });
+  cLock.addEventListener("change",()=>{ if(cLock.checked && cW.value){ cH.value=Math.round(cW.value/aspect()); renderConvert(); } });
+  cQ.addEventListener("input",()=>{ cQval.textContent=cQ.value+"%"; renderConvert(); });
+  cFormat.addEventListener("change",()=>{
+    cQwrap.style.display = cFormat.value==="image/png" ? "none":"block";
+    renderConvert();
+  });
+
+  let convertBlob=null, convertToken=0;
+  function targetDims(){
+    let w=parseInt(cW.value)||state.w, h=parseInt(cH.value)||state.h;
+    w=Math.max(1,w); h=Math.max(1,h);
+    return {w,h};
+  }
+  function drawTo(w,h){
+    const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+    const ctx=cv.getContext("2d");
+    ctx.imageSmoothingQuality="high";
+    if(cFormat.value==="image/jpeg"){ ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); }
+    ctx.drawImage(state.img,0,0,w,h);
+    return cv;
+  }
+  function renderConvert(){
+    if(!state.img) return;
+    const token=++convertToken;
+    const {w,h}=targetDims();
+    const cv=drawTo(w,h);
+    showInStage("#stage-convert",cv);
+    const q=cFormat.value==="image/png"?undefined:cQ.value/100;
+    cv.toBlob(blob=>{
+      if(token!==convertToken) return;
+      convertBlob=blob;
+      const delta = blob.size<=state.srcSize
+        ? `<b>−${Math.round((1-blob.size/state.srcSize)*100)}%</b> vs. original`
+        : `<b>+${Math.round((blob.size/state.srcSize-1)*100)}%</b> vs. original`;
+      $("#c-meta").innerHTML =
+        `Original: <b>${state.w}×${state.h}</b> · ${fmtBytes(state.srcSize)}<br>`+
+        `Saída: <b>${w}×${h}</b> · ${extFor(cFormat.value).toUpperCase()} · ${fmtBytes(blob.size)} · ${delta}`;
+    }, cFormat.value, q);
+  }
+  $("#c-go").addEventListener("click",()=>{
+    if(!convertBlob) return;
+    download(convertBlob, state.name+"."+extFor(cFormat.value));
+    toast("Baixando…");
+  });
+
+  // ---------- CROP ----------
+  const PRESETS=[
+    {name:"Instagram — Post",  w:1080,h:1080},
+    {name:"Instagram — Retrato",w:1080,h:1350},
+    {name:"Story / Reels",     w:1080,h:1920},
+    {name:"YouTube — Thumb",   w:1280,h:720},
+    {name:"Paisagem 16:9",     w:1920,h:1080},
+    {name:"X / Twitter",       w:1600,h:900},
+    {name:"Facebook — Capa",   w:1640,h:924},
+    {name:"LinkedIn — Capa",   w:1584,h:396},
+  ];
+  let cropSel=0, cropBlob=null;
+  const presetsBox=$("#presets");
+  PRESETS.forEach((p,i)=>{
+    const b=document.createElement("button");
+    b.className="preset"; b.setAttribute("aria-pressed", i===0?"true":"false");
+    b.innerHTML=`<div class="p-name">${p.name}</div><div class="p-dim">${p.w}×${p.h}</div>`;
+    b.addEventListener("click",()=>{ cropSel=i;
+      $$(".preset").forEach(x=>x.setAttribute("aria-pressed","false"));
+      b.setAttribute("aria-pressed","true"); renderCropPreview(); });
+    presetsBox.appendChild(b);
+  });
+  $("#cr-format").addEventListener("change",renderCropPreview);
+
+  function cropCanvas(){
+    const p=PRESETS[cropSel];
+    const tR=p.w/p.h, sR=state.w/state.h;
+    let sw,sh,sx,sy;
+    if(sR>tR){ sh=state.h; sw=Math.round(sh*tR); sx=Math.round((state.w-sw)/2); sy=0; }
+    else{ sw=state.w; sh=Math.round(sw/tR); sx=0; sy=Math.round((state.h-sh)/2); }
+    const cv=document.createElement("canvas"); cv.width=p.w; cv.height=p.h;
+    const ctx=cv.getContext("2d"); ctx.imageSmoothingQuality="high";
+    const fmt=$("#cr-format").value;
+    if(fmt==="image/jpeg"){ ctx.fillStyle="#fff"; ctx.fillRect(0,0,p.w,p.h); }
+    ctx.drawImage(state.img,sx,sy,sw,sh,0,0,p.w,p.h);
+    return cv;
+  }
+  let cropToken=0;
+  function renderCropPreview(){
+    if(!state.img) return;
+    const token=++cropToken;
+    const p=PRESETS[cropSel];
+    const cv=cropCanvas();
+    showInStage("#stage-crop",cv);
+    const fmt=$("#cr-format").value;
+    const q=fmt==="image/png"?undefined:.9;
+    cv.toBlob(blob=>{
+      if(token!==cropToken) return; // ignora render antigo
+      cropBlob=blob;
+      $("#cr-meta").innerHTML=`Saída: <b>${p.w}×${p.h}</b> · ${extFor(fmt).toUpperCase()} · ${fmtBytes(blob.size)}`;
+    },fmt,q);
+  }
+  $("#cr-go").addEventListener("click",()=>{
+    if(!cropBlob) return;
+    const p=PRESETS[cropSel];
+    download(cropBlob, `${state.name}-${p.w}x${p.h}.${extFor($("#cr-format").value)}`);
+    toast("Baixando…");
+  });
+
+  // ---------- OCR ----------
+  const oGo=$("#o-go"), oProg=$("#o-prog"), oProgBar=oProg.querySelector("i"),
+        oStatus=$("#o-status"), oOut=$("#o-out");
+  oGo.addEventListener("click",async()=>{
+    if(!state.img){ return; }
+    if(typeof Tesseract==="undefined"){ toast("Biblioteca OCR não carregou. Verifique a conexão."); return; }
+    oGo.disabled=true; oProg.style.display="block"; oProgBar.style.width="0%";
+    oStatus.textContent="Preparando…"; oOut.value="";
+    // desenha num canvas para não depender da URL da imagem (que pode estar revogada)
+    const ocv=document.createElement("canvas"); ocv.width=state.w; ocv.height=state.h;
+    ocv.getContext("2d").drawImage(state.img,0,0);
+    const label={ "loading tesseract core":"Carregando motor…","initializing tesseract":"Iniciando…",
+      "loading language traineddata":"Baixando idioma…","initializing api":"Preparando…",
+      "recognizing text":"Lendo texto…" };
+    try{
+      const {data}=await Tesseract.recognize(ocv, $("#o-lang").value, {
+        workerPath:"https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js",
+        corePath:"https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-simd.wasm.js",
+        langPath:"https://cdn.jsdelivr.net/gh/naptha/tessdata@gh-pages/4.0.0",
+        logger:m=>{
+          if(m.status){ oStatus.textContent=(label[m.status]||m.status); }
+          if(typeof m.progress==="number"){ oProgBar.style.width=Math.round(m.progress*100)+"%"; }
+        }
+      });
+      oOut.value=(data.text||"").trim();
+      oStatus.textContent = oOut.value ? "Pronto." : "Nenhum texto reconhecido.";
+      if(oOut.value) toast("Texto extraído!");
+    }catch(err){
+      oStatus.textContent="Erro ao processar: "+(err.message||err);
+    }finally{
+      oGo.disabled=false;
+      setTimeout(()=>{ oProg.style.display="none"; },600);
+    }
+  });
+  $("#o-copy").addEventListener("click",async()=>{
+    if(!oOut.value){ toast("Nada para copiar."); return; }
+    try{ await navigator.clipboard.writeText(oOut.value); toast("Copiado!"); }
+    catch{ oOut.select(); document.execCommand("copy"); toast("Copiado!"); }
+  });
+  $("#o-txt").addEventListener("click",()=>{
+    if(!oOut.value){ toast("Nada para baixar."); return; }
+    download(new Blob([oOut.value],{type:"text/plain;charset=utf-8"}), state.name+".txt");
+  });
+
+})();
+</script>
+</body>
+</html>
