@@ -291,6 +291,16 @@
     color:var(--ink-3);font-size:13px}
   body.ads-preview .ad-inner::after{content:"Espaço reservado para anúncio"}
 
+  /* Aviso de cookies */
+  .cookie{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:80;
+    width:min(680px,calc(100% - 28px));display:none;gap:14px;align-items:center;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line-strong);border-radius:14px;padding:14px 16px;
+    box-shadow:var(--shadow);font-size:13px;color:var(--ink-2)}
+  .cookie.show{display:flex;animation:fadeUp .4s ease both}
+  .cookie span{flex:1;min-width:200px;line-height:1.5}
+  .cookie-btns{display:flex;gap:8px;margin-left:auto}
+  .cookie .btn.sm{width:auto}
+
   @media (prefers-reduced-motion: reduce){
     #intro .intro-bars i,.intro-word,.intro-line,.intro-sub,.intro-skip,
     header .logo,header .privacy,.hero-title,.hero-sub,.hero .seg,.chips,.view.active,.panel.active{animation:none;opacity:1;transform:none}
@@ -654,7 +664,7 @@
 
 <footer>
   <div class="wrap foot-in">
-    <span>Oficina de Mídia — processamento 100% local, suas mídias não saem do navegador.</span>
+    <span>Oficina de Mídia — processamento 100% local, suas mídias não saem do navegador. · <a href="/privacidade">Privacidade</a></span>
     <span class="made-by">Feito por
       <a class="ig" href="https://instagram.com/dev_mkbraion" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
@@ -665,6 +675,14 @@
 </footer>
 
 <div class="toast" id="toast"></div>
+
+<div class="cookie" id="cookie">
+  <span>Usamos armazenamento local para lembrar preferências. Com anúncios ativos, parceiros podem usar cookies. <a href="/privacidade">Saiba mais</a>.</span>
+  <div class="cookie-btns">
+    <button class="btn ghost sm" id="cookie-no">Recusar</button>
+    <button class="btn sm" id="cookie-yes">Aceitar</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" async></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" async></script>
@@ -721,6 +739,17 @@
   // espaços de anúncio: mostra só quando têm código dentro (ou em ?ads=preview)
   try{ if(new URLSearchParams(location.search).get("ads")==="preview") document.body.classList.add("ads-preview"); }catch(e){}
   $$(".ad-slot").forEach(s=>{ const inner=s.querySelector(".ad-inner"); if(inner && inner.children.length) s.classList.add("filled"); });
+
+  // aviso de cookies
+  (function(){
+    const ck=$("#cookie"); if(!ck) return;
+    let choice=null; try{ choice=localStorage.getItem("ofm_cookies"); }catch(e){}
+    if(!choice) ck.classList.add("show");
+    function set(v){ try{ localStorage.setItem("ofm_cookies",v); }catch(e){} ck.classList.remove("show"); }
+    const y=$("#cookie-yes"), n=$("#cookie-no");
+    if(y) y.addEventListener("click",()=>set("accepted"));
+    if(n) n.addEventListener("click",()=>set("rejected"));
+  })();
 
   // ===================== IMAGE: single =====================
   const state = { img:null, name:"imagem", w:0, h:0, srcSize:0 };
