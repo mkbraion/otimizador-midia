@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://otimizador-midia.vercel.app/sitemap.xml
