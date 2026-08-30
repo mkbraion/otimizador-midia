@@ -281,6 +281,16 @@
   @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
   @media(min-width:761px){ .stage{min-height:360px} }
 
+  /* ===================== ESPAÇOS DE ANÚNCIO ===================== */
+  /* Escondidos até receberem código de anúncio (ou no modo ?ads=preview). */
+  .ad-slot{display:none;margin:22px auto;padding:0 20px;max-width:1140px}
+  .ad-slot.filled,body.ads-preview .ad-slot{display:block}
+  .ad-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);text-align:center;margin-bottom:6px}
+  .ad-inner{display:flex;align-items:center;justify-content:center;min-height:100px;overflow:hidden}
+  body.ads-preview .ad-inner{border:1px dashed var(--line-strong);border-radius:12px;background:var(--card);
+    color:var(--ink-3);font-size:13px}
+  body.ads-preview .ad-inner::after{content:"Espaço reservado para anúncio"}
+
   @media (prefers-reduced-motion: reduce){
     #intro .intro-bars i,.intro-word,.intro-line,.intro-sub,.intro-skip,
     header .logo,header .privacy,.hero-title,.hero-sub,.hero .seg,.chips,.view.active,.panel.active{animation:none;opacity:1;transform:none}
@@ -345,6 +355,14 @@
     </div>
   </div>
 </section>
+
+<!-- ESPAÇO DE ANÚNCIO (topo) — cole o código do Adsterra/Monetag dentro de .ad-inner -->
+<div class="ad-slot" id="ad-top">
+  <div class="ad-label">Publicidade</div>
+  <div class="ad-inner" id="ad-top-inner">
+    <!-- COLE AQUI O CÓDIGO DO ANÚNCIO -->
+  </div>
+</div>
 
 <main>
   <div class="wrap">
@@ -626,6 +644,14 @@
   </div>
 </main>
 
+<!-- ESPAÇO DE ANÚNCIO (rodapé) — cole o código do Adsterra/Monetag dentro de .ad-inner -->
+<div class="ad-slot" id="ad-bottom">
+  <div class="ad-label">Publicidade</div>
+  <div class="ad-inner" id="ad-bottom-inner">
+    <!-- COLE AQUI O CÓDIGO DO ANÚNCIO -->
+  </div>
+</div>
+
 <footer>
   <div class="wrap foot-in">
     <span>Oficina de Mídia — processamento 100% local, suas mídias não saem do navegador.</span>
@@ -691,6 +717,10 @@
       const m=document.querySelector("main"); if(m) m.scrollIntoView({behavior:"smooth",block:"start"});
     });
   });
+
+  // espaços de anúncio: mostra só quando têm código dentro (ou em ?ads=preview)
+  try{ if(new URLSearchParams(location.search).get("ads")==="preview") document.body.classList.add("ads-preview"); }catch(e){}
+  $$(".ad-slot").forEach(s=>{ const inner=s.querySelector(".ad-inner"); if(inner && inner.children.length) s.classList.add("filled"); });
 
   // ===================== IMAGE: single =====================
   const state = { img:null, name:"imagem", w:0, h:0, srcSize:0 };
