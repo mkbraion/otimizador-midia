@@ -327,6 +327,18 @@
   .cookie-btns{display:flex;gap:8px;margin-left:auto}
   .cookie .btn.sm{width:auto}
 
+  /* FAQ (SEO) */
+  .faq{max-width:780px;margin:30px auto 0;padding:0 20px}
+  .faq h2{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(22px,4vw,30px);text-align:center;margin:0 0 20px;color:var(--ink)}
+  .faq details{border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:10px;box-shadow:var(--shadow)}
+  .faq summary{cursor:pointer;padding:15px 16px;font-weight:600;font-size:15px;color:var(--ink);
+    list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";color:var(--accent);font-size:22px;font-weight:400;line-height:1;transition:transform .2s}
+  .faq details[open] summary::after{transform:rotate(45deg)}
+  .faq details p{margin:0;padding:0 16px 16px;color:var(--ink-2);font-size:14.5px;line-height:1.65}
+  .faq details p a{color:var(--accent-ink)}
+
   @media (prefers-reduced-motion: reduce){
     #intro .intro-bars i,.intro-word,.intro-line,.intro-sub,.intro-skip,
     header .logo,header .privacy,.hero-title,.hero-sub,.hero .seg,.chips,.view.active,.panel.active{animation:none;opacity:1;transform:none}
@@ -679,6 +691,54 @@
 
   </div>
 </main>
+
+<section class="faq" id="faq">
+  <h2>Perguntas frequentes</h2>
+  <details>
+    <summary>Como comprimir uma imagem online sem perder qualidade?</summary>
+    <p>Na aba <b>Converter &amp; redimensionar</b> (ou <b>Comprimir em lote</b>, para várias de uma vez), escolha o formato <b>WEBP</b> ou <b>JPG</b> e ajuste o controle de qualidade. O WEBP costuma reduzir bastante o tamanho do arquivo mantendo a imagem nítida. Tudo acontece no seu navegador, sem enviar nada.</p>
+  </details>
+  <details>
+    <summary>Como converter imagem para WEBP, JPG ou PNG?</summary>
+    <p>Arraste a imagem, escolha o formato de saída (WEBP, JPG ou PNG) e baixe. Use <b>PNG</b> quando precisar de fundo transparente, <b>JPG</b> para fotos e <b>WEBP</b> para o menor tamanho possível.</p>
+  </details>
+  <details>
+    <summary>Como cortar imagem para Instagram, Stories, YouTube ou Facebook?</summary>
+    <p>Na aba <b>Cortar para redes</b>, escolha o formato pronto: Instagram Post (1080×1080), Retrato (1080×1350), Stories/Reels (1080×1920), thumbnail do YouTube (1280×720), capa do Facebook e do LinkedIn, entre outros. O corte é centralizado e sem distorção.</p>
+  </details>
+  <details>
+    <summary>Como extrair texto de uma imagem (OCR)?</summary>
+    <p>Na aba <b>Extrair texto (OCR)</b>, envie a imagem e o site reconhece o texto em português e inglês. Depois é só copiar ou baixar como arquivo .txt. Ótimo para prints, documentos e recibos.</p>
+  </details>
+  <details>
+    <summary>Como comprimir ou converter um vídeo (MP4, WebM, GIF)?</summary>
+    <p>Na seção <b>Vídeo</b>, dá para <b>comprimir</b> (reduzir o tamanho do MP4), <b>converter</b> entre MP4, WebM, GIF e MP3, <b>cortar a duração</b> e <b>reenquadrar para redes</b>. O processamento é feito no próprio navegador.</p>
+  </details>
+  <details>
+    <summary>Como baixar um vídeo do YouTube?</summary>
+    <p>Na aba <b>Baixar do YouTube</b>, cole o link do vídeo, escolha a qualidade (até 1080p) ou só o áudio, e baixe. Use apenas para conteúdo <b>seu</b>, de <b>domínio público</b>, <b>Creative Commons</b> ou com <b>permissão</b> — respeite os direitos autorais.</p>
+  </details>
+  <details>
+    <summary>É grátis? Meus arquivos são enviados para algum servidor?</summary>
+    <p>Sim, é <b>grátis</b>. As ferramentas de imagem e vídeo rodam <b>100% no seu navegador</b> — seus arquivos não saem do seu aparelho. Veja mais na <a href="/privacidade">política de privacidade</a>.</p>
+  </details>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Como comprimir uma imagem online sem perder qualidade?","acceptedAnswer":{"@type":"Answer","text":"Na aba Converter & redimensionar (ou Comprimir em lote), escolha WEBP ou JPG e ajuste a qualidade. O WEBP reduz bastante o tamanho mantendo a imagem nítida. Tudo no navegador, sem enviar nada."}},
+    {"@type":"Question","name":"Como converter imagem para WEBP, JPG ou PNG?","acceptedAnswer":{"@type":"Answer","text":"Arraste a imagem, escolha o formato de saída (WEBP, JPG ou PNG) e baixe. PNG para transparência, JPG para fotos e WEBP para o menor tamanho."}},
+    {"@type":"Question","name":"Como cortar imagem para Instagram, Stories, YouTube ou Facebook?","acceptedAnswer":{"@type":"Answer","text":"Na aba Cortar para redes, escolha o formato pronto (Instagram, Stories/Reels, YouTube, Facebook, LinkedIn). O corte é centralizado e sem distorção."}},
+    {"@type":"Question","name":"Como extrair texto de uma imagem (OCR)?","acceptedAnswer":{"@type":"Answer","text":"Na aba Extrair texto (OCR), envie a imagem e o site reconhece o texto em português e inglês. Depois é só copiar ou baixar como .txt."}},
+    {"@type":"Question","name":"Como comprimir ou converter um vídeo (MP4, WebM, GIF)?","acceptedAnswer":{"@type":"Answer","text":"Na seção Vídeo dá para comprimir MP4, converter entre MP4/WebM/GIF/MP3, cortar a duração e reenquadrar para redes. Tudo no navegador."}},
+    {"@type":"Question","name":"Como baixar um vídeo do YouTube?","acceptedAnswer":{"@type":"Answer","text":"Na aba Baixar do YouTube, cole o link, escolha a qualidade (até 1080p) ou só o áudio, e baixe. Use apenas para conteúdo próprio, de domínio público, Creative Commons ou com permissão."}},
+    {"@type":"Question","name":"É grátis? Meus arquivos são enviados para algum servidor?","acceptedAnswer":{"@type":"Answer","text":"Sim, é grátis. As ferramentas de imagem e vídeo rodam 100% no navegador — seus arquivos não saem do aparelho."}}
+  ]
+}
+</script>
 
 <!-- ESPAÇO DE ANÚNCIO (rodapé) — cole o código do Adsterra/Monetag dentro de .ad-inner -->
 <div class="ad-slot" id="ad-bottom">
