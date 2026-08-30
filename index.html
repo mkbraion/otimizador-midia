@@ -228,6 +228,22 @@
   .chip:hover{border-color:var(--accent);color:var(--ink);background:#fff;transform:translateY(-1px)}
   main{padding-top:20px}
 
+  /* ===================== FUNDO + TEMA ===================== */
+  /* grão de papel sutil na página toda */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.045;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  header,.hero,main,footer{position:relative;z-index:1}
+  /* hero: banda mais quente com grade de pontos terracota (papel de oficina) */
+  .hero{
+    background-color:#f1e9de;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23b4502e' opacity='0.12'/%3E%3C/svg%3E");
+    background-position:center top;
+  }
+  /* cards um tiquinho mais “de papel” sobre o fundo */
+  .stage,.controls{background:var(--card)}
+
   @media (prefers-reduced-motion: reduce){
     #intro .intro-bars i,.intro-word,.intro-line,.intro-sub,.intro-skip,
     header .logo,header .privacy,.hero-title,.hero-sub,.hero .seg,.chips,.view.active,.panel.active{animation:none;opacity:1;transform:none}
