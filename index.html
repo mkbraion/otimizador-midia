@@ -213,10 +213,25 @@
   .disclaimer-ic{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;
     font-weight:700;font-size:13px;line-height:20px;text-align:center}
 
+  /* Hero */
+  .hero{border-bottom:1px solid var(--line);padding:46px 0 32px;text-align:center;background:var(--paper)}
+  .hero-title{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(30px,5.6vw,54px);
+    line-height:1.04;letter-spacing:-.022em;margin:0 0 14px;color:var(--ink);animation:fadeUp .6s ease both}
+  .hero-title em{font-style:normal;color:var(--accent)}
+  .hero-sub{max-width:640px;margin:0 auto 24px;color:var(--ink-2);font-size:clamp(14px,1.8vw,16.5px);
+    line-height:1.55;animation:fadeUp .6s ease .08s both}
+  .hero .seg{animation:fadeUp .6s ease .16s both}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px;animation:fadeUp .6s ease .24s both}
+  .chip{appearance:none;border:1px solid var(--line-strong);background:var(--card);color:var(--ink-2);font:inherit;
+    font-size:12.5px;font-weight:500;padding:7px 14px;border-radius:100px;cursor:pointer;
+    transition:border-color .15s,color .15s,transform .12s,background .15s}
+  .chip:hover{border-color:var(--accent);color:var(--ink);background:#fff;transform:translateY(-1px)}
+  main{padding-top:20px}
+
   @media (prefers-reduced-motion: reduce){
     #intro .intro-bars i,.intro-word,.intro-line,.intro-sub,.intro-skip,
-    header .logo,header .privacy,header .seg,.view.active,.panel.active{animation:none;opacity:1;transform:none}
-    .controls:hover,.stage:hover,.drop:hover,.preset:hover{transform:none}
+    header .logo,header .privacy,.hero-title,.hero-sub,.hero .seg,.chips,.view.active,.panel.active{animation:none;opacity:1;transform:none}
+    .controls:hover,.stage:hover,.drop:hover,.preset:hover,.chip:hover{transform:none}
   }
 </style>
 </head>
@@ -257,12 +272,26 @@
       <div class="logo">Oficina de <b>Mídia</b></div>
       <span class="privacy"><span class="dot"></span> Roda no seu navegador — nada é enviado</span>
     </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1 class="hero-title">Sua oficina de <em>imagem</em> e <em>vídeo</em></h1>
+    <p class="hero-sub">Converter, comprimir, cortar para redes, extrair texto e baixar do YouTube — rápido, privado e direto no seu navegador. Nenhum arquivo sai do seu aparelho.</p>
     <div class="seg" role="tablist">
       <button role="tab" aria-selected="true" data-view="img">Imagem</button>
       <button role="tab" aria-selected="false" data-view="vid">Vídeo</button>
     </div>
+    <div class="chips">
+      <button class="chip" data-view="img" data-tab="batch">Comprimir em lote</button>
+      <button class="chip" data-view="img" data-tab="crop">Cortar p/ redes</button>
+      <button class="chip" data-view="img" data-tab="ocr">Extrair texto</button>
+      <button class="chip" data-view="vid" data-vtab="vcompress">Comprimir vídeo</button>
+      <button class="chip" data-view="vid" data-vtab="vyt">Baixar do YouTube</button>
+    </div>
   </div>
-</header>
+</section>
 
 <main>
   <div class="wrap">
@@ -588,6 +617,17 @@
       b.setAttribute("aria-selected","true");
       $$(".view").forEach(v=>v.classList.remove("active"));
       $("#view-"+b.dataset.view).classList.add("active");
+    });
+  });
+
+  // atalhos do hero → abrem a ferramenta certa
+  $$(".chip").forEach(ch=>{
+    ch.addEventListener("click",()=>{
+      const seg=document.querySelector('.seg button[data-view="'+ch.dataset.view+'"]');
+      if(seg) seg.click();
+      if(ch.dataset.tab){ const t=document.querySelector('#view-img .tab[data-tab="'+ch.dataset.tab+'"]'); if(t) t.click(); }
+      if(ch.dataset.vtab){ const t=document.querySelector('#view-vid .tab[data-vtab="'+ch.dataset.vtab+'"]'); if(t) t.click(); }
+      const m=document.querySelector("main"); if(m) m.scrollIntoView({behavior:"smooth",block:"start"});
     });
   });
 
