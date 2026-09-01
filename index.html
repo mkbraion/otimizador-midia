@@ -401,7 +401,7 @@
       <button class="chip" data-view="img" data-tab="crop">Cortar p/ redes</button>
       <button class="chip" data-view="img" data-tab="ocr">Extrair texto</button>
       <button class="chip" data-view="vid" data-vtab="vcompress">Comprimir vídeo</button>
-      <button class="chip" data-view="vid" data-vtab="vyt">Baixar do YouTube</button>
+      <button class="chip" data-view="vid" data-vtab="vyt">Baixar vídeo (URL)</button>
     </div>
   </div>
 </section>
@@ -564,7 +564,7 @@
       <button class="tab" role="tab" aria-selected="false" data-vtab="vconvert">Converter formato</button>
       <button class="tab" role="tab" aria-selected="false" data-vtab="vtrim">Cortar duração</button>
       <button class="tab" role="tab" aria-selected="false" data-vtab="vcrop">Cortar p/ redes</button>
-      <button class="tab" role="tab" aria-selected="false" data-vtab="vyt">Baixar do YouTube</button>
+      <button class="tab" role="tab" aria-selected="false" data-vtab="vyt">Baixar vídeo (URL)</button>
     </nav>
 
     <div id="vid-editor">
@@ -661,11 +661,11 @@
     <!-- BAIXAR DO YOUTUBE -->
     <div id="yt-block" style="display:none">
       <div class="controls" style="max-width:640px;margin:22px auto 0">
-        <h3>Baixar do YouTube</h3>
-        <div class="sub">Cole o link do vídeo e escolha a qualidade. Até 4K ou só o áudio.</div>
+        <h3>Baixar vídeo</h3>
+        <div class="sub">YouTube, TikTok, Pinterest ou Medal. Cole o link e escolha a qualidade ou só o áudio.</div>
         <div class="disclaimer">
           <span class="disclaimer-ic" aria-hidden="true">!</span>
-          <span>Baixe apenas conteúdo <b>seu</b>, de <b>domínio público</b>, <b>Creative Commons</b> ou com <b>permissão</b>. Respeite os direitos autorais e os Termos do YouTube.</span>
+          <span>Baixe apenas conteúdo <b>seu</b>, de <b>domínio público</b>, <b>Creative Commons</b> ou com <b>permissão</b>. Respeite os direitos autorais e os Termos de cada plataforma.</span>
         </div>
         <div class="field" id="yt-backend-field" style="display:none">
           <label class="lbl">Endereço do servidor (avançado)</label>
@@ -673,7 +673,7 @@
         </div>
         <div class="field">
           <label class="lbl">Link do vídeo</label>
-          <input type="text" id="yt-url" placeholder="https://www.youtube.com/watch?v=..." spellcheck="false">
+          <input type="text" id="yt-url" placeholder="Cole o link do YouTube, TikTok, Pinterest ou Medal…" spellcheck="false">
         </div>
         <button class="btn" id="yt-fetch">Buscar vídeo</button>
         <div class="status" id="yt-status" style="margin-top:8px"></div>
@@ -1222,7 +1222,7 @@
   $("#yt-fetch").addEventListener("click",async()=>{
     const base=backendBase(), url=(ytUrl.value||"").trim();
     if(!base){ $("#yt-status").textContent="Cole o endereço do seu servidor primeiro."; return; }
-    if(!/youtu\.?be/.test(url)){ $("#yt-status").textContent="Cole um link válido do YouTube."; return; }
+    if(!/(youtu\.?be|tiktok\.com|pinterest\.[a-z.]+|pin\.it|medal\.tv)/i.test(url)){ $("#yt-status").textContent="Cole um link do YouTube, TikTok, Pinterest ou Medal."; return; }
     try{ localStorage.setItem("ofm_backend", base); }catch(e){}
     $("#yt-result").style.display="none"; $("#yt-status").textContent="Buscando…"; $("#yt-fetch").disabled=true;
     try{
@@ -1233,8 +1233,10 @@
       $("#yt-thumb").src=data.thumbnail||"";
       $("#yt-title").textContent=data.title||"(sem título)";
       $("#yt-info").textContent=(data.uploader?data.uploader+" · ":"")+fmtDur(data.duration);
-      const sel=$("#yt-format"); sel.innerHTML=""; const maxH=data.maxHeight||1080; const opts=[{v:"best",t:"Melhor disponível"}];
-      [2160,1440,1080,720,480,360].forEach(h=>{ if(h<=maxH) opts.push({v:"h"+h,t:h+"p"}); });
+      const sel=$("#yt-format"); sel.innerHTML=""; const opts=[{v:"best",t:"Melhor disponível"}];
+      // só oferece resoluções que o site realmente informou (TikTok/Pinterest costumam ter só uma)
+      (data.heights||[]).filter(h=>[2160,1440,1080,720,480,360].includes(h)).sort((a,b)=>b-a)
+        .forEach(h=>opts.push({v:"h"+h,t:h+"p"}));
       opts.push({v:"audio",t:"Só áudio (m4a)"});
       opts.forEach(o=>{ const op=document.createElement("option"); op.value=o.v; op.textContent=o.t; sel.appendChild(op); });
       $("#yt-note").textContent=""; $("#yt-status").textContent=""; $("#yt-result").style.display="block";
