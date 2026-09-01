@@ -7,6 +7,19 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="mask-icon" href="/favicon.svg" color="#b4502e">
 <meta name="theme-color" content="#b4502e">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://otimizador-midia.vercel.app/">
+<meta property="og:site_name" content="Oficina de Mídia">
+<meta property="og:title" content="Oficina de Mídia — toda a sua mídia num lugar só">
+<meta property="og:description" content="Comprimir, converter, cortar p/ redes, extrair texto (OCR) e baixar do YouTube — direto no navegador, sem enviar seus arquivos.">
+<meta property="og:image" content="https://otimizador-midia.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Oficina de Mídia — toda a sua mídia num lugar só">
+<meta name="twitter:description" content="Comprimir, converter, cortar, OCR e baixar do YouTube — tudo no navegador.">
+<meta name="twitter:image" content="https://otimizador-midia.vercel.app/og.png">
 <meta name="description" content="Ferramenta rápida no navegador: converter e comprimir imagens (em lote), cortar para redes, extrair texto (OCR) e comprimir/converter vídeos. Nada é enviado para servidores.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +68,9 @@
   .seg button[aria-selected="true"]{background:var(--accent);color:#fff}
 
   /* Tabs */
-  nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:14px;overflow-x:auto}
+  nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:14px;overflow-x:auto;
+    scrollbar-width:none;-ms-overflow-style:none}
+  nav.tabs::-webkit-scrollbar{display:none;height:0}
   .tab{appearance:none;border:0;background:none;font:inherit;font-weight:500;font-size:14.5px;
     color:var(--ink-2);padding:12px 14px;cursor:pointer;border-bottom:2px solid transparent;
     margin-bottom:-1px;white-space:nowrap}
