@@ -228,6 +228,12 @@
   .chip:hover{border-color:var(--accent);color:var(--ink);background:#fff;transform:translateY(-1px)}
   main{padding-top:20px}
 
+  /* Instagram no rodapé */
+  .made-by{display:inline-flex;align-items:center;gap:5px}
+  .ig{display:inline-flex;align-items:center;gap:5px;color:var(--accent-ink);text-decoration:none;font-weight:600;transition:color .15s}
+  .ig:hover{color:var(--accent)}
+  .ig svg{flex:none}
+
   /* ===================== FUNDO + TEMA ===================== */
   /* grão de papel sutil na página toda */
   body::before{
@@ -589,7 +595,12 @@
 <footer>
   <div class="wrap foot-in">
     <span>Oficina de Mídia — processamento 100% local, suas mídias não saem do navegador.</span>
-    <span>Feito por mkbraion</span>
+    <span class="made-by">Feito por
+      <a class="ig" href="https://instagram.com/dev_mkbraion" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        @dev_mkbraion
+      </a>
+    </span>
   </div>
 </footer>
 
