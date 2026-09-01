@@ -662,7 +662,7 @@
     <div id="yt-block" style="display:none">
       <div class="controls" style="max-width:640px;margin:22px auto 0">
         <h3>Baixar vídeo</h3>
-        <div class="sub">YouTube, TikTok, Pinterest ou Medal. Cole o link e escolha a qualidade ou só o áudio.</div>
+        <div class="sub">YouTube, TikTok, Instagram, Facebook, Pinterest ou Medal. Cole o link e escolha a qualidade ou só o áudio.</div>
         <div class="disclaimer">
           <span class="disclaimer-ic" aria-hidden="true">!</span>
           <span>Baixe apenas conteúdo <b>seu</b>, de <b>domínio público</b>, <b>Creative Commons</b> ou com <b>permissão</b>. Respeite os direitos autorais e os Termos de cada plataforma.</span>
@@ -673,7 +673,7 @@
         </div>
         <div class="field">
           <label class="lbl">Link do vídeo</label>
-          <input type="text" id="yt-url" placeholder="Cole o link do YouTube, TikTok, Pinterest ou Medal…" spellcheck="false">
+          <input type="text" id="yt-url" placeholder="Link do YouTube, TikTok, Instagram, Facebook, Pinterest ou Medal…" spellcheck="false">
         </div>
         <button class="btn" id="yt-fetch">Buscar vídeo</button>
         <div class="status" id="yt-status" style="margin-top:8px"></div>
@@ -1222,7 +1222,7 @@
   $("#yt-fetch").addEventListener("click",async()=>{
     const base=backendBase(), url=(ytUrl.value||"").trim();
     if(!base){ $("#yt-status").textContent="Cole o endereço do seu servidor primeiro."; return; }
-    if(!/(youtu\.?be|tiktok\.com|pinterest\.[a-z.]+|pin\.it|medal\.tv)/i.test(url)){ $("#yt-status").textContent="Cole um link do YouTube, TikTok, Pinterest ou Medal."; return; }
+    if(!/(youtu\.?be|tiktok\.com|instagram\.com|instagr\.am|facebook\.com|fb\.watch|fb\.com|pinterest\.[a-z.]+|pin\.it|medal\.tv)/i.test(url)){ $("#yt-status").textContent="Cole um link do YouTube, TikTok, Instagram, Facebook, Pinterest ou Medal."; return; }
     try{ localStorage.setItem("ofm_backend", base); }catch(e){}
     $("#yt-result").style.display="none"; $("#yt-status").textContent="Buscando…"; $("#yt-fetch").disabled=true;
     try{
