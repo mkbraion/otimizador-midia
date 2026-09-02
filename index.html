@@ -69,13 +69,33 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
+  html{background:var(--paper)}
   body{
-    background:var(--paper);
+    background:transparent;
     color:var(--ink);
     font-family:'Instrument Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
   }
+
+  /* ===== Fundo animado (blobs quentes que derivam devagar) ===== */
+  .bg-fx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:var(--paper)}
+  .bg-fx .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;will-change:transform}
+  .bg-fx .b1{width:46vw;height:46vw;left:-8vw;top:-6vw;
+    background:radial-gradient(circle at 30% 30%,rgba(180,80,46,.55),rgba(180,80,46,0) 70%);
+    animation:drift1 24s ease-in-out infinite}
+  .bg-fx .b2{width:40vw;height:40vw;right:-6vw;top:12vh;
+    background:radial-gradient(circle at 60% 40%,rgba(217,138,95,.5),rgba(217,138,95,0) 70%);
+    animation:drift2 30s ease-in-out infinite}
+  .bg-fx .b3{width:38vw;height:38vw;left:22vw;bottom:-12vh;
+    background:radial-gradient(circle at 50% 50%,rgba(143,61,33,.4),rgba(143,61,33,0) 70%);
+    animation:drift3 27s ease-in-out infinite}
+  /* véu de papel por cima pra manter o texto legível e o clima "tinta/papel" */
+  .bg-fx::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(244,241,234,.5),rgba(244,241,234,.68))}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6vw,4vh) scale(1.12)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-5vw,6vh) scale(1.08)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(4vw,-5vh) scale(1.14)}}
   .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
 
   /* Header */
@@ -177,11 +197,15 @@
   input[type=range]{width:100%;accent-color:var(--accent)}
   .rng-val{font-size:12px;color:var(--ink-2);float:right}
 
-  .btn{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;
+  .btn{appearance:none;position:relative;overflow:hidden;border:1px solid var(--accent);background:var(--accent);color:#fff;
     font:inherit;font-weight:600;font-size:14px;padding:11px 16px;border-radius:8px;cursor:pointer;
-    width:100%;transition:background .15s,transform .05s}
-  .btn:hover{background:var(--accent-ink)}
-  .btn:active{transform:translateY(1px)}
+    width:100%;transition:background .15s,transform .12s cubic-bezier(.2,.9,.3,1.3),box-shadow .2s}
+  /* brilho que varre no hover */
+  .btn::after{content:"";position:absolute;top:0;left:-120%;width:70%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);transition:left .55s ease}
+  .btn:hover{background:var(--accent-ink);transform:translateY(-2px);box-shadow:0 8px 20px -8px rgba(180,80,46,.6)}
+  .btn:hover::after{left:130%}
+  .btn:active{transform:translateY(0) scale(.98);box-shadow:0 3px 10px -6px rgba(180,80,46,.6)}
   .btn:disabled{opacity:.45;cursor:not-allowed}
   .btn.ghost{background:#fff;color:var(--ink);border-color:var(--line-strong)}
   .btn.ghost:hover{border-color:var(--ink-2)}
@@ -377,10 +401,16 @@
     #intro .intro-bars i,.intro-word,.intro-line,.intro-sub,.intro-skip,
     header .logo,header .privacy,.hero-title,.hero-sub,.hero .seg,.chips,.view.active,.panel.active{animation:none;opacity:1;transform:none}
     .controls:hover,.stage:hover,.drop:hover,.preset:hover,.chip:hover{transform:none}
+    .bg-fx .blob{animation:none!important}
+    .btn:hover{transform:none}
+    .btn::after{display:none}
   }
 </style>
 </head>
 <body>
+
+<!-- ===== FUNDO ANIMADO ===== -->
+<div class="bg-fx" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
 
 <!-- ===== INTRO ===== -->
 <div id="intro">
@@ -423,7 +453,7 @@
 <section class="hero">
   <div class="wrap">
     <h1 class="hero-title">Toda a sua mídia<br>num <em>lugar só</em></h1>
-    <p class="hero-sub">Converter, comprimir, cortar para redes, extrair texto e baixar do YouTube — rápido, privado e direto no seu navegador. Nenhum arquivo sai do seu aparelho.</p>
+    <p class="hero-sub">Converter, comprimir, cortar para redes, extrair texto e baixar vídeos (YouTube, TikTok, Instagram e mais) — rápido, privado e direto no seu navegador. Nenhum arquivo sai do seu aparelho.</p>
     <div class="seg" role="tablist">
       <button role="tab" aria-selected="true" data-view="img">Imagem</button>
       <button role="tab" aria-selected="false" data-view="vid">Vídeo</button>
