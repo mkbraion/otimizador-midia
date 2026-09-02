@@ -49,7 +49,7 @@
 <meta name="description" content="Ferramenta rápida no navegador: converter e comprimir imagens (em lote), cortar para redes, extrair texto (OCR) e comprimir/converter vídeos. Nada é enviado para servidores.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#f4f1ea;
@@ -72,7 +72,7 @@
   body{
     background:var(--paper);
     color:var(--ink);
-    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    font-family:'Instrument Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
   }
@@ -81,7 +81,7 @@
   /* Header */
   header{border-bottom:1px solid var(--line);background:var(--paper)}
   .head-in{display:flex;align-items:center;gap:14px;padding:22px 0 18px;flex-wrap:wrap}
-  .logo{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:22px;letter-spacing:-.01em}
+  .logo{font-family:'Bricolage Grotesque',Georgia,serif;font-weight:600;font-size:22px;letter-spacing:-.01em}
   .logo b{color:var(--accent)}
   .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);
     border:1px solid var(--line);background:var(--card);padding:5px 10px;border-radius:100px;margin-left:auto}
@@ -126,7 +126,7 @@
 
   .controls{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
     padding:18px;box-shadow:var(--shadow)}
-  .controls h3{margin:0 0 4px;font-family:'Fraunces',serif;font-weight:600;font-size:16px}
+  .controls h3{margin:0 0 4px;font-family:'Bricolage Grotesque',serif;font-weight:700;font-size:16px}
   .controls .sub{font-size:12.5px;color:var(--ink-3);margin-bottom:16px}
   .field{margin-bottom:15px}
   label.lbl{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;
@@ -138,6 +138,38 @@
     border-radius:8px;background:#fff;color:var(--ink)}
   input:focus,select:focus{outline:none;border-color:var(--accent)}
   .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+
+  /* Baixador de URL — card em destaque */
+  .dl-feature{position:relative;border:1.5px solid var(--line-strong);
+    background:linear-gradient(180deg,rgba(180,80,46,.05),rgba(180,80,46,0) 120px),var(--card);
+    box-shadow:0 10px 34px -18px rgba(180,80,46,.45),var(--shadow)}
+  .dl-feature::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:10px 10px 0 0;
+    background:linear-gradient(90deg,var(--accent),#d98a5f)}
+  .dl-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;color:#fff;
+    background:var(--accent);padding:4px 10px;border-radius:100px;margin-bottom:10px}
+  .dl-plats{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}
+  .dl-plats span{font-size:11px;font-weight:600;color:var(--accent-ink);background:rgba(180,80,46,.09);
+    border:1px solid rgba(180,80,46,.18);padding:3px 9px;border-radius:100px}
+  .dl-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .btn.ghost{background:transparent;color:var(--accent-ink);border:1.5px solid var(--line-strong);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--accent);background:rgba(180,80,46,.05)}
+  .dl-list-head{margin-bottom:10px}
+  .dl-list-bar{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .dl-check{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none}
+  .dl-check input{width:16px;height:16px;accent-color:var(--accent)}
+  .dl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;
+    max-height:420px;overflow-y:auto;padding:2px;margin-bottom:14px}
+  .dl-item{position:relative;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--paper-2);cursor:pointer}
+  .dl-item.sel{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent)}
+  .dl-item img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:var(--paper-2)}
+  .dl-item .cap{font-size:11px;color:var(--ink-2);padding:6px 7px;line-height:1.3;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .dl-item .tick{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:100px;
+    background:rgba(255,255,255,.9);border:1.5px solid var(--line-strong);display:flex;align-items:center;justify-content:center;
+    font-size:12px;color:transparent}
+  .dl-item.sel .tick{background:var(--accent);border-color:var(--accent);color:#fff}
+  .dl-item .dur{position:absolute;bottom:34px;right:6px;background:rgba(0,0,0,.72);color:#fff;
+    font-size:10px;padding:1px 5px;border-radius:5px}
 
   .check{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink);cursor:pointer;user-select:none}
   .check input{width:16px;height:16px;accent-color:var(--accent)}
@@ -217,7 +249,7 @@
   .intro-bars i:nth-child(3){animation-delay:.24s}
   .intro-bars i:nth-child(4){animation-delay:.36s;background:var(--ink)}
   .intro-bars i:nth-child(5){animation-delay:.48s}
-  .intro-word{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(30px,7vw,52px);letter-spacing:-.02em;
+  .intro-word{font-family:'Bricolage Grotesque',Georgia,serif;font-weight:600;font-size:clamp(30px,7vw,52px);letter-spacing:-.02em;
     color:var(--ink);opacity:0;animation:fadeUp .7s ease .12s both}
   .intro-word b{color:var(--accent)}
   .intro-line{width:min(300px,64vw);height:2px;background:var(--line-strong);margin:16px auto 14px;transform:scaleX(0);
@@ -259,7 +291,7 @@
 
   /* Hero */
   .hero{border-bottom:1px solid var(--line);padding:46px 0 32px;text-align:center;background:var(--paper)}
-  .hero-title{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(30px,5.6vw,54px);
+  .hero-title{font-family:'Bricolage Grotesque',Georgia,serif;font-weight:600;font-size:clamp(30px,5.6vw,54px);
     line-height:1.04;letter-spacing:-.022em;margin:0 0 14px;color:var(--ink);animation:fadeUp .6s ease both}
   .hero-title em{font-style:normal;color:var(--accent)}
   .hero-sub{max-width:640px;margin:0 auto 24px;color:var(--ink-2);font-size:clamp(14px,1.8vw,16.5px);
@@ -331,7 +363,7 @@
 
   /* FAQ (SEO) */
   .faq{max-width:780px;margin:30px auto 0;padding:0 20px}
-  .faq h2{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(22px,4vw,30px);text-align:center;margin:0 0 20px;color:var(--ink)}
+  .faq h2{font-family:'Bricolage Grotesque',Georgia,serif;font-weight:600;font-size:clamp(22px,4vw,30px);text-align:center;margin:0 0 20px;color:var(--ink)}
   .faq details{border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:10px;box-shadow:var(--shadow)}
   .faq summary{cursor:pointer;padding:15px 16px;font-weight:600;font-size:15px;color:var(--ink);
     list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -658,25 +690,30 @@
     </div>
     </div><!-- /vid-editor -->
 
-    <!-- BAIXAR DO YOUTUBE -->
+    <!-- BAIXAR VÍDEO POR URL (destaque) -->
     <div id="yt-block" style="display:none">
-      <div class="controls" style="max-width:640px;margin:22px auto 0">
-        <h3>Baixar vídeo</h3>
-        <div class="sub">YouTube, TikTok, Instagram, Facebook, Pinterest ou Medal. Cole o link e escolha a qualidade ou só o áudio.</div>
-        <div class="disclaimer">
-          <span class="disclaimer-ic" aria-hidden="true">!</span>
-          <span>Baixe apenas conteúdo <b>seu</b>, de <b>domínio público</b>, <b>Creative Commons</b> ou com <b>permissão</b>. Respeite os direitos autorais e os Termos de cada plataforma.</span>
+      <div class="controls dl-feature" style="max-width:680px;margin:22px auto 0">
+        <div class="dl-badge">★ Baixador de URL</div>
+        <h3 style="font-size:22px">Cole um link e baixe o vídeo</h3>
+        <div class="sub">Funciona com <b>YouTube</b>, <b>TikTok</b>, <b>Instagram</b>, <b>Facebook</b>, <b>Pinterest</b> e <b>Medal</b> — vídeo ou só o áudio. TikTok e Instagram saem <b>sem marca d'água</b>.</div>
+        <div class="dl-plats" aria-hidden="true">
+          <span>YouTube</span><span>TikTok</span><span>Instagram</span><span>Facebook</span><span>Pinterest</span><span>Medal</span>
         </div>
         <div class="field" id="yt-backend-field" style="display:none">
           <label class="lbl">Endereço do servidor (avançado)</label>
           <input type="text" id="yt-backend" placeholder="https://seu-servidor.up.railway.app" spellcheck="false">
         </div>
-        <div class="field">
-          <label class="lbl">Link do vídeo</label>
-          <input type="text" id="yt-url" placeholder="Link do YouTube, TikTok, Instagram, Facebook, Pinterest ou Medal…" spellcheck="false">
+        <div class="field" style="margin-top:14px">
+          <label class="lbl">Link do vídeo ou do perfil</label>
+          <input type="text" id="yt-url" placeholder="Link do vídeo, ou perfil do TikTok/Instagram (vários vídeos)…" spellcheck="false">
         </div>
-        <button class="btn" id="yt-fetch">Buscar vídeo</button>
+        <div class="dl-actions">
+          <button class="btn" id="yt-fetch">Baixar vídeo</button>
+          <button class="btn ghost" id="yt-fetch-profile">Perfil (vários) →</button>
+        </div>
         <div class="status" id="yt-status" style="margin-top:8px"></div>
+
+        <!-- resultado: vídeo único -->
         <div id="yt-result" style="display:none;margin-top:16px">
           <div style="display:flex;gap:12px;align-items:flex-start">
             <img id="yt-thumb" alt="" style="width:128px;border-radius:8px;background:var(--paper-2)">
@@ -688,6 +725,25 @@
           </div>
           <button class="btn" id="yt-dl">Baixar</button>
           <div class="note" id="yt-note"></div>
+        </div>
+
+        <!-- resultado: perfil / lote -->
+        <div id="yt-list" style="display:none;margin-top:16px">
+          <div class="dl-list-head">
+            <div><div id="yt-list-title" style="font-weight:600;font-size:14px"></div><div id="yt-list-sub" class="sub" style="margin:3px 0 0"></div></div>
+          </div>
+          <div class="dl-list-bar">
+            <label class="dl-check"><input type="checkbox" id="yt-all" checked> Selecionar todos</label>
+            <select id="yt-list-format" style="margin-left:auto;max-width:190px"></select>
+          </div>
+          <div id="yt-grid" class="dl-grid"></div>
+          <button class="btn" id="yt-dl-batch">Baixar selecionados</button>
+          <div class="note" id="yt-list-note">Os downloads saem um a um do servidor, com uma pausa entre eles pra não sobrecarregar. Deixe a aba aberta.</div>
+        </div>
+
+        <div class="disclaimer" style="margin-top:16px">
+          <span class="disclaimer-ic" aria-hidden="true">!</span>
+          <span>Baixe apenas conteúdo <b>seu</b>, de <b>domínio público</b>, <b>Creative Commons</b> ou com <b>permissão</b>. Respeite os direitos autorais e os Termos de cada plataforma.</span>
         </div>
       </div>
     </div>
@@ -1211,20 +1267,28 @@
   });
   $("#v-dl").addEventListener("click",()=>{ if(vOutBlob) download(vOutBlob, $("#v-dl").dataset.name||("video-oficina."+outInfo().ext)); });
 
-  // ===================== YOUTUBE =====================
+  // ===================== BAIXADOR DE URL =====================
   const DEFAULT_BACKEND="https://otimizador-midia-yt-backend-production.up.railway.app";
+  const URL_RE=/(youtu\.?be|tiktok\.com|instagram\.com|instagr\.am|facebook\.com|fb\.watch|fb\.com|pinterest\.[a-z.]+|pin\.it|medal\.tv)/i;
   const ytBackend=$("#yt-backend"), ytUrl=$("#yt-url"); let ytData=null;
   try{ const saved=localStorage.getItem("ofm_backend"); ytBackend.value = saved || DEFAULT_BACKEND; }catch(e){ ytBackend.value=DEFAULT_BACKEND; }
   ytBackend.addEventListener("change",()=>{ try{ localStorage.setItem("ofm_backend", ytBackend.value.trim()); }catch(e){} });
   function backendBase(){ return ((ytBackend.value||"").trim()||DEFAULT_BACKEND).replace(/\/+$/,""); }
   function fmtDur(s){ s=Math.round(s||0); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+  function dlUrl(base,url,v,title){
+    let q="url="+encodeURIComponent(url)+"&title="+encodeURIComponent(title||"video");
+    if(v==="audio") q+="&audio=1"; else if(v&&v.charAt(0)==="h") q+="&height="+v.slice(1);
+    return base+"/download?"+q;
+  }
+  function trigger(href){ const a=document.createElement("a"); a.href=href; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove(); }
+  function hideResults(){ $("#yt-result").style.display="none"; $("#yt-list").style.display="none"; }
 
+  // ---- vídeo único ----
   $("#yt-fetch").addEventListener("click",async()=>{
     const base=backendBase(), url=(ytUrl.value||"").trim();
-    if(!base){ $("#yt-status").textContent="Cole o endereço do seu servidor primeiro."; return; }
-    if(!/(youtu\.?be|tiktok\.com|instagram\.com|instagr\.am|facebook\.com|fb\.watch|fb\.com|pinterest\.[a-z.]+|pin\.it|medal\.tv)/i.test(url)){ $("#yt-status").textContent="Cole um link do YouTube, TikTok, Instagram, Facebook, Pinterest ou Medal."; return; }
+    if(!URL_RE.test(url)){ $("#yt-status").textContent="Cole um link do YouTube, TikTok, Instagram, Facebook, Pinterest ou Medal."; return; }
     try{ localStorage.setItem("ofm_backend", base); }catch(e){}
-    $("#yt-result").style.display="none"; $("#yt-status").textContent="Buscando…"; $("#yt-fetch").disabled=true;
+    hideResults(); $("#yt-status").textContent="Buscando…"; $("#yt-fetch").disabled=true;
     try{
       const r=await fetch(base+"/info?url="+encodeURIComponent(url));
       const data=await r.json();
@@ -1234,25 +1298,80 @@
       $("#yt-title").textContent=data.title||"(sem título)";
       $("#yt-info").textContent=(data.uploader?data.uploader+" · ":"")+fmtDur(data.duration);
       const sel=$("#yt-format"); sel.innerHTML=""; const opts=[{v:"best",t:"Melhor disponível"}];
-      // só oferece resoluções que o site realmente informou (TikTok/Pinterest costumam ter só uma)
       (data.heights||[]).filter(h=>[2160,1440,1080,720,480,360].includes(h)).sort((a,b)=>b-a)
         .forEach(h=>opts.push({v:"h"+h,t:h+"p"}));
       opts.push({v:"audio",t:"Só áudio (m4a)"});
       opts.forEach(o=>{ const op=document.createElement("option"); op.value=o.v; op.textContent=o.t; sel.appendChild(op); });
       $("#yt-note").textContent=""; $("#yt-status").textContent=""; $("#yt-result").style.display="block";
-    }catch(e){ $("#yt-status").textContent="Erro: "+(e.message||e)+" — o servidor está no ar e acessível (HTTPS)?"; }
+    }catch(e){ $("#yt-status").textContent="Erro: "+(e.message||e); }
     finally{ $("#yt-fetch").disabled=false; }
   });
 
   $("#yt-dl").addEventListener("click",()=>{
-    const base=backendBase(), url=(ytUrl.value||"").trim(); if(!base||!ytData) return;
-    const v=$("#yt-format").value, title=ytData.title||"video";
-    let q="url="+encodeURIComponent(url)+"&title="+encodeURIComponent(title);
-    if(v==="audio") q+="&audio=1"; else if(v.charAt(0)==="h") q+="&height="+v.slice(1);
-    const a=document.createElement("a"); a.href=base+"/download?"+q; a.rel="noopener";
-    document.body.appendChild(a); a.click(); a.remove();
-    $("#yt-note").textContent="O download começou no seu servidor — pode levar um tempo (ele baixa e junta o vídeo antes de enviar).";
+    const base=backendBase(), url=(ytUrl.value||"").trim(); if(!ytData) return;
+    trigger(dlUrl(base,url,$("#yt-format").value,ytData.title));
+    $("#yt-note").textContent="O download começou no servidor — pode levar um tempo (ele baixa e junta o vídeo antes de enviar).";
     toast("Download iniciado…");
+  });
+
+  // ---- perfil / lote ----
+  let listEntries=[]; const selected=new Set();
+  $("#yt-fetch-profile").addEventListener("click",async()=>{
+    const base=backendBase(), url=(ytUrl.value||"").trim();
+    if(!URL_RE.test(url)){ $("#yt-status").textContent="Cole o link de um perfil (ex.: tiktok.com/@usuario)."; return; }
+    try{ localStorage.setItem("ofm_backend", base); }catch(e){}
+    hideResults(); $("#yt-status").textContent="Listando vídeos do perfil… (pode levar alguns segundos)"; $("#yt-fetch-profile").disabled=true;
+    try{
+      const r=await fetch(base+"/playlist?url="+encodeURIComponent(url));
+      const data=await r.json();
+      if(!r.ok||data.error) throw new Error(data.error||("HTTP "+r.status));
+      listEntries=data.entries||[]; selected.clear(); listEntries.forEach((_,i)=>selected.add(i));
+      $("#yt-list-title").textContent=(data.uploader?"@"+String(data.uploader).replace(/^@/,""):data.title)||"Perfil";
+      $("#yt-list-sub").textContent=data.count+" vídeo(s)"+(data.truncated?" (limitado a "+data.max+" no servidor público)":"")+" · TikTok/Instagram saem sem marca d'água";
+      const fsel=$("#yt-list-format"); fsel.innerHTML="";
+      [{v:"best",t:"Melhor disponível"},{v:"h1080",t:"até 1080p"},{v:"h720",t:"até 720p"},{v:"h480",t:"até 480p"},{v:"audio",t:"Só áudio"}]
+        .forEach(o=>{ const op=document.createElement("option"); op.value=o.v; op.textContent=o.t; fsel.appendChild(op); });
+      renderGrid();
+      $("#yt-all").checked=true; $("#yt-status").textContent=""; $("#yt-list").style.display="block";
+    }catch(e){ $("#yt-status").textContent="Erro: "+(e.message||e); }
+    finally{ $("#yt-fetch-profile").disabled=false; }
+  });
+
+  function renderGrid(){
+    const g=$("#yt-grid"); g.innerHTML="";
+    listEntries.forEach((e,i)=>{
+      const d=document.createElement("div"); d.className="dl-item"+(selected.has(i)?" sel":"");
+      d.innerHTML='<div class="tick">✓</div>'+
+        (e.thumbnail?'<img loading="lazy" src="'+e.thumbnail+'" alt="">':'<img alt="">')+
+        (e.duration?'<div class="dur">'+fmtDur(e.duration)+'</div>':'')+
+        '<div class="cap">'+(e.title||"vídeo "+(i+1)).replace(/[<>]/g,"")+'</div>';
+      d.addEventListener("click",()=>{ if(selected.has(i))selected.delete(i); else selected.add(i);
+        d.classList.toggle("sel"); syncBatchBtn(); $("#yt-all").checked=selected.size===listEntries.length; });
+      g.appendChild(d);
+    });
+    syncBatchBtn();
+  }
+  function syncBatchBtn(){ $("#yt-dl-batch").textContent="Baixar selecionados ("+selected.size+")"; $("#yt-dl-batch").disabled=selected.size===0; }
+
+  $("#yt-all").addEventListener("change",()=>{
+    selected.clear(); if($("#yt-all").checked) listEntries.forEach((_,i)=>selected.add(i));
+    document.querySelectorAll("#yt-grid .dl-item").forEach((el,i)=>el.classList.toggle("sel",selected.has(i)));
+    syncBatchBtn();
+  });
+
+  let batching=false;
+  $("#yt-dl-batch").addEventListener("click",async()=>{
+    if(batching) return; const base=backendBase(), v=$("#yt-list-format").value;
+    const idx=[...selected].sort((a,b)=>a-b); if(!idx.length) return;
+    batching=true; $("#yt-dl-batch").disabled=true;
+    for(let k=0;k<idx.length;k++){
+      const e=listEntries[idx[k]];
+      $("#yt-list-note").textContent="Baixando "+(k+1)+" de "+idx.length+"… deixe a aba aberta.";
+      trigger(dlUrl(base,e.url,v,e.title||"video_"+(idx[k]+1)));
+      if(k<idx.length-1) await new Promise(r=>setTimeout(r,1800)); // pausa entre downloads
+    }
+    $("#yt-list-note").textContent="Pronto — "+idx.length+" download(s) iniciados. Se o navegador pedir, permita baixar vários arquivos.";
+    toast(idx.length+" download(s) iniciados"); batching=false; $("#yt-dl-batch").disabled=false;
   });
 
 })();
