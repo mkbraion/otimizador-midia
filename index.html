@@ -199,6 +199,12 @@
   .ig-adv textarea{width:100%;font:inherit;font-size:12px;font-family:'JetBrains Mono',ui-monospace,monospace;
     padding:9px 11px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;color:var(--ink);resize:vertical}
   .ig-adv textarea:focus{outline:none;border-color:var(--accent)}
+  .ig-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;background:var(--ink-3);vertical-align:middle}
+  .ig-dot.on{background:#2e9e5b;box-shadow:0 0 0 3px rgba(46,158,91,.18)}
+  .ig-dot.exp{background:#d98a2e;box-shadow:0 0 0 3px rgba(217,138,46,.18)}
+  .ig-badge{font-size:12px;font-weight:600;margin:0 0 10px;display:flex;align-items:center;gap:6px;color:var(--ink-3)}
+  .ig-badge.on{color:#1f7d45}
+  .ig-badge.exp{color:#b9741f}
 
   .check{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink);cursor:pointer;user-select:none}
   .check input{width:16px;height:16px;accent-color:var(--accent)}
@@ -781,8 +787,9 @@
         </div>
 
         <details class="ig-adv">
-          <summary>Cookie do Instagram — pra baixar por perfil</summary>
+          <summary>Cookie do Instagram — pra baixar por perfil <span class="ig-dot" id="ig-dot"></span></summary>
           <div class="ig-adv-body">
+            <div class="ig-badge" id="ig-badge"></div>
             <p class="sub" style="margin:0 0 10px">Cole o conteúdo do <b>cookies.txt</b> de uma conta <b>secundária</b> do Instagram (use a extensão “Get cookies.txt LOCALLY”, estando logado no instagram.com). Fica só <b>no seu navegador</b>; é enviado ao servidor por HTTPS e guardado apenas em memória (expira em 2h). ⚠️ Nunca use sua conta principal — há risco de bloqueio por raspagem.</p>
             <textarea id="ig-cookie" rows="4" placeholder="# Netscape HTTP Cookie File&#10;.instagram.com	TRUE	/	TRUE	...	sessionid	..." spellcheck="false"></textarea>
             <div class="dl-actions" style="margin-top:10px">
@@ -1330,13 +1337,29 @@
 
   // ---- cookie do Instagram (por token opaco; o cookie real nunca vai na URL) ----
   const isIG=u=>/instagram\.com|instagr\.am/i.test(u||"");
-  let igSid=null;
+  let igSid=null, igExpired=false;
   try{ const c=localStorage.getItem("ofm_ig_cookie"); if(c) $("#ig-cookie").value=c; }catch(e){}
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function renderIgStatus(){
+    const dot=$("#ig-dot"), badge=$("#ig-badge");
+    const raw=lsGet("ofm_ig_cookie"), at=+lsGet("ofm_ig_at")||0, ttl=+lsGet("ofm_ig_ttl")||120;
+    dot.className="ig-dot"; badge.className="ig-badge";
+    if(!raw){ badge.textContent="○ Nenhum cookie salvo"; return; }
+    const rem=Math.round(ttl-(Date.now()-at)/60000);
+    if(igExpired || rem<=0){ dot.classList.add("exp"); badge.classList.add("exp");
+      badge.textContent="● Cookie expirado — cole de novo e clique em Salvar"; }
+    else { dot.classList.add("on"); badge.classList.add("on");
+      badge.textContent="● Cookie ativo · expira em ~"+rem+" min"; }
+  }
   async function registerIg(base,raw){
     const r=await fetch(base+"/ig-cookie",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cookie:raw})});
     const d=await r.json(); if(!r.ok||d.error) throw new Error(d.error||("HTTP "+r.status));
-    igSid=d.sid; return igSid;
+    igSid=d.sid; igExpired=false;
+    try{ localStorage.setItem("ofm_ig_at",String(Date.now())); localStorage.setItem("ofm_ig_ttl",String(d.ttlMinutes||120)); }catch(e){}
+    renderIgStatus(); return igSid;
   }
+  function markIgMaybeExpired(url,msg){ if(isIG(url) && /login|cookie|rate|not available|indispon|private|privado|empty|vazio|sign in|entre/i.test(msg||"")){ igExpired=true; renderIgStatus(); } }
+  renderIgStatus(); setInterval(renderIgStatus, 60000);
   async function ensureIgSid(){
     if(igSid) return igSid;
     let raw=null; try{ raw=localStorage.getItem("ofm_ig_cookie"); }catch(e){}
@@ -1355,8 +1378,9 @@
     finally{ $("#ig-save").disabled=false; }
   });
   $("#ig-clear").addEventListener("click",()=>{
-    try{ localStorage.removeItem("ofm_ig_cookie"); }catch(e){} igSid=null; $("#ig-cookie").value="";
-    $("#ig-status").textContent="Cookie removido deste navegador.";
+    try{ localStorage.removeItem("ofm_ig_cookie"); localStorage.removeItem("ofm_ig_at"); localStorage.removeItem("ofm_ig_ttl"); }catch(e){}
+    igSid=null; igExpired=false; $("#ig-cookie").value="";
+    $("#ig-status").textContent="Cookie removido deste navegador."; renderIgStatus();
   });
 
   function dlUrl(base,url,v,title,ig){
@@ -1388,7 +1412,7 @@
       opts.push({v:"audio",t:"Só áudio (m4a)"});
       opts.forEach(o=>{ const op=document.createElement("option"); op.value=o.v; op.textContent=o.t; sel.appendChild(op); });
       $("#yt-note").textContent=""; $("#yt-status").textContent=""; $("#yt-result").style.display="block";
-    }catch(e){ $("#yt-status").textContent="Erro: "+(e.message||e); }
+    }catch(e){ $("#yt-status").textContent="Erro: "+(e.message||e); markIgMaybeExpired(url,e.message); }
     finally{ $("#yt-fetch").disabled=false; }
   });
 
@@ -1418,7 +1442,7 @@
         .forEach(o=>{ const op=document.createElement("option"); op.value=o.v; op.textContent=o.t; fsel.appendChild(op); });
       renderGrid();
       $("#yt-all").checked=true; $("#yt-status").textContent=""; $("#yt-list").style.display="block";
-    }catch(e){ $("#yt-status").textContent="Erro: "+(e.message||e); }
+    }catch(e){ $("#yt-status").textContent="Erro: "+(e.message||e); markIgMaybeExpired(url,e.message); }
     finally{ $("#yt-fetch-profile").disabled=false; }
   });
 
