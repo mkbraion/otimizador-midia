@@ -1470,9 +1470,9 @@
       if(!r.ok||data.error) throw new Error(data.error||("HTTP "+r.status));
       listEntries=data.entries||[]; selected.clear(); listEntries.forEach((_,i)=>selected.add(i));
       $("#yt-list-title").textContent=(data.uploader?"@"+String(data.uploader).replace(/^@/,""):data.title)||"Perfil";
-      $("#yt-list-sub").textContent=data.count+" vídeo(s)"+(data.truncated?" (limitado a "+data.max+" no servidor público)":"")+" · TikTok/Instagram saem sem marca d'água";
+      $("#yt-list-sub").textContent=data.count+" vídeo(s)"+(data.truncated?" (limitado a "+data.max+" no servidor público)":"")+" · qualidade original, sem marca d'água";
       const fsel=$("#yt-list-format"); fsel.innerHTML="";
-      [{v:"best",t:"Melhor disponível"},{v:"h1080",t:"até 1080p"},{v:"h720",t:"até 720p"},{v:"h480",t:"até 480p"},{v:"audio",t:"Só áudio"}]
+      [{v:"best",t:"Máxima qualidade (original)"},{v:"audio",t:"Só áudio (m4a)"}]
         .forEach(o=>{ const op=document.createElement("option"); op.value=o.v; op.textContent=o.t; fsel.appendChild(op); });
       renderGrid();
       $("#yt-all").checked=true; $("#yt-status").textContent=""; $("#yt-list").style.display="block";
