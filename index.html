@@ -190,6 +190,15 @@
   .dl-item.sel .tick{background:var(--accent);border-color:var(--accent);color:#fff}
   .dl-item .dur{position:absolute;bottom:34px;right:6px;background:rgba(0,0,0,.72);color:#fff;
     font-size:10px;padding:1px 5px;border-radius:5px}
+  .ig-adv{margin-top:16px;border:1px solid var(--line);border-radius:9px;background:var(--paper-2);overflow:hidden}
+  .ig-adv summary{cursor:pointer;padding:11px 14px;font-size:13px;font-weight:600;color:var(--ink-2);list-style:none;user-select:none}
+  .ig-adv summary::-webkit-details-marker{display:none}
+  .ig-adv summary::before{content:"⚙  ";opacity:.6}
+  .ig-adv[open] summary{border-bottom:1px solid var(--line)}
+  .ig-adv-body{padding:12px 14px}
+  .ig-adv textarea{width:100%;font:inherit;font-size:12px;font-family:'JetBrains Mono',ui-monospace,monospace;
+    padding:9px 11px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;color:var(--ink);resize:vertical}
+  .ig-adv textarea:focus{outline:none;border-color:var(--accent)}
 
   .check{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink);cursor:pointer;user-select:none}
   .check input{width:16px;height:16px;accent-color:var(--accent)}
@@ -771,6 +780,19 @@
           <div class="note" id="yt-list-note">Os downloads saem um a um do servidor, com uma pausa entre eles pra não sobrecarregar. Deixe a aba aberta.</div>
         </div>
 
+        <details class="ig-adv">
+          <summary>Cookie do Instagram — pra baixar por perfil</summary>
+          <div class="ig-adv-body">
+            <p class="sub" style="margin:0 0 10px">Cole o conteúdo do <b>cookies.txt</b> de uma conta <b>secundária</b> do Instagram (use a extensão “Get cookies.txt LOCALLY”, estando logado no instagram.com). Fica só <b>no seu navegador</b>; é enviado ao servidor por HTTPS e guardado apenas em memória (expira em 2h). ⚠️ Nunca use sua conta principal — há risco de bloqueio por raspagem.</p>
+            <textarea id="ig-cookie" rows="4" placeholder="# Netscape HTTP Cookie File&#10;.instagram.com	TRUE	/	TRUE	...	sessionid	..." spellcheck="false"></textarea>
+            <div class="dl-actions" style="margin-top:10px">
+              <button class="btn sm" id="ig-save">Salvar cookie</button>
+              <button class="btn sm ghost" id="ig-clear">Remover</button>
+            </div>
+            <div class="note" id="ig-status"></div>
+          </div>
+        </details>
+
         <div class="disclaimer" style="margin-top:16px">
           <span class="disclaimer-ic" aria-hidden="true">!</span>
           <span>Baixe apenas conteúdo <b>seu</b>, de <b>domínio público</b>, <b>Creative Commons</b> ou com <b>permissão</b>. Respeite os direitos autorais e os Termos de cada plataforma.</span>
@@ -1305,9 +1327,42 @@
   ytBackend.addEventListener("change",()=>{ try{ localStorage.setItem("ofm_backend", ytBackend.value.trim()); }catch(e){} });
   function backendBase(){ return ((ytBackend.value||"").trim()||DEFAULT_BACKEND).replace(/\/+$/,""); }
   function fmtDur(s){ s=Math.round(s||0); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
-  function dlUrl(base,url,v,title){
+
+  // ---- cookie do Instagram (por token opaco; o cookie real nunca vai na URL) ----
+  const isIG=u=>/instagram\.com|instagr\.am/i.test(u||"");
+  let igSid=null;
+  try{ const c=localStorage.getItem("ofm_ig_cookie"); if(c) $("#ig-cookie").value=c; }catch(e){}
+  async function registerIg(base,raw){
+    const r=await fetch(base+"/ig-cookie",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cookie:raw})});
+    const d=await r.json(); if(!r.ok||d.error) throw new Error(d.error||("HTTP "+r.status));
+    igSid=d.sid; return igSid;
+  }
+  async function ensureIgSid(){
+    if(igSid) return igSid;
+    let raw=null; try{ raw=localStorage.getItem("ofm_ig_cookie"); }catch(e){}
+    if(!raw) return null;
+    try{ return await registerIg(backendBase(),raw); }catch(e){ return null; }
+  }
+  async function igParam(url){ if(!isIG(url)) return ""; const sid=await ensureIgSid(); return sid?("&ig="+sid):""; }
+
+  $("#ig-save").addEventListener("click",async()=>{
+    const raw=($("#ig-cookie").value||"").trim();
+    if(!raw){ $("#ig-status").textContent="Cole o cookies.txt primeiro."; return; }
+    try{ localStorage.setItem("ofm_ig_cookie",raw); }catch(e){}
+    igSid=null; $("#ig-status").textContent="Salvando…"; $("#ig-save").disabled=true;
+    try{ await registerIg(backendBase(),raw); $("#ig-status").textContent="Cookie salvo ✓ — agora dá pra baixar por perfil do Instagram."; toast("Cookie do Instagram salvo"); }
+    catch(e){ $("#ig-status").textContent="Erro: "+(e.message||e); }
+    finally{ $("#ig-save").disabled=false; }
+  });
+  $("#ig-clear").addEventListener("click",()=>{
+    try{ localStorage.removeItem("ofm_ig_cookie"); }catch(e){} igSid=null; $("#ig-cookie").value="";
+    $("#ig-status").textContent="Cookie removido deste navegador.";
+  });
+
+  function dlUrl(base,url,v,title,ig){
     let q="url="+encodeURIComponent(url)+"&title="+encodeURIComponent(title||"video");
     if(v==="audio") q+="&audio=1"; else if(v&&v.charAt(0)==="h") q+="&height="+v.slice(1);
+    if(ig) q+=ig;
     return base+"/download?"+q;
   }
   function trigger(href){ const a=document.createElement("a"); a.href=href; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove(); }
@@ -1320,7 +1375,7 @@
     try{ localStorage.setItem("ofm_backend", base); }catch(e){}
     hideResults(); $("#yt-status").textContent="Buscando…"; $("#yt-fetch").disabled=true;
     try{
-      const r=await fetch(base+"/info?url="+encodeURIComponent(url));
+      const r=await fetch(base+"/info?url="+encodeURIComponent(url)+await igParam(url));
       const data=await r.json();
       if(!r.ok||data.error) throw new Error(data.error||("HTTP "+r.status));
       ytData=data;
@@ -1337,9 +1392,9 @@
     finally{ $("#yt-fetch").disabled=false; }
   });
 
-  $("#yt-dl").addEventListener("click",()=>{
+  $("#yt-dl").addEventListener("click",async()=>{
     const base=backendBase(), url=(ytUrl.value||"").trim(); if(!ytData) return;
-    trigger(dlUrl(base,url,$("#yt-format").value,ytData.title));
+    trigger(dlUrl(base,url,$("#yt-format").value,ytData.title,await igParam(url)));
     $("#yt-note").textContent="O download começou no servidor — pode levar um tempo (ele baixa e junta o vídeo antes de enviar).";
     toast("Download iniciado…");
   });
@@ -1352,7 +1407,7 @@
     try{ localStorage.setItem("ofm_backend", base); }catch(e){}
     hideResults(); $("#yt-status").textContent="Listando vídeos do perfil… (pode levar alguns segundos)"; $("#yt-fetch-profile").disabled=true;
     try{
-      const r=await fetch(base+"/playlist?url="+encodeURIComponent(url));
+      const r=await fetch(base+"/playlist?url="+encodeURIComponent(url)+await igParam(url));
       const data=await r.json();
       if(!r.ok||data.error) throw new Error(data.error||("HTTP "+r.status));
       listEntries=data.entries||[]; selected.clear(); listEntries.forEach((_,i)=>selected.add(i));
@@ -1394,10 +1449,11 @@
     if(batching) return; const base=backendBase(), v=$("#yt-list-format").value;
     const idx=[...selected].sort((a,b)=>a-b); if(!idx.length) return;
     batching=true; $("#yt-dl-batch").disabled=true;
+    const ig=idx.length?await igParam(listEntries[idx[0]].url):"";
     for(let k=0;k<idx.length;k++){
       const e=listEntries[idx[k]];
       $("#yt-list-note").textContent="Baixando "+(k+1)+" de "+idx.length+"… deixe a aba aberta.";
-      trigger(dlUrl(base,e.url,v,e.title||"video_"+(idx[k]+1)));
+      trigger(dlUrl(base,e.url,v,e.title||"video_"+(idx[k]+1),ig));
       if(k<idx.length-1) await new Promise(r=>setTimeout(r,1800)); // pausa entre downloads
     }
     $("#yt-list-note").textContent="Pronto — "+idx.length+" download(s) iniciados. Se o navegador pedir, permita baixar vários arquivos.";
