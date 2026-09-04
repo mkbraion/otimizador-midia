@@ -1470,7 +1470,7 @@
       if(!r.ok||data.error) throw new Error(data.error||("HTTP "+r.status));
       listEntries=data.entries||[]; selected.clear(); listEntries.forEach((_,i)=>selected.add(i));
       $("#yt-list-title").textContent=(data.uploader?"@"+String(data.uploader).replace(/^@/,""):data.title)||"Perfil";
-      $("#yt-list-sub").textContent=data.count+" vídeo(s)"+(data.truncated?" (limitado a "+data.max+" no servidor público)":"")+" · qualidade original, sem marca d'água";
+      $("#yt-list-sub").textContent=data.count+" vídeo(s)"+(data.truncated?" (limitado a "+data.max+" no servidor público)":"")+" · qualidade original (H.264, toca em qualquer player), sem marca d'água";
       const fsel=$("#yt-list-format"); fsel.innerHTML="";
       [{v:"best",t:"Máxima qualidade (original)"},{v:"audio",t:"Só áudio (m4a)"}]
         .forEach(o=>{ const op=document.createElement("option"); op.value=o.v; op.textContent=o.t; fsel.appendChild(op); });
