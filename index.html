@@ -818,7 +818,7 @@
         <details class="ig-adv" id="ig-collect-box">
           <summary>Instagram: baixar perfil inteiro (fotos, vídeos e destaques)</summary>
           <div class="ig-adv-body">
-            <p class="sub" style="margin:0 0 10px">Cole o <b>@ ou o link do perfil</b> no campo de link lá em cima, marque o que quer e gere um <b>.zip</b>. Precisa do <b>cookie do Instagram</b> (conta secundária, seção abaixo). Perfis grandes demoram e têm teto de itens pra não sobrecarregar o servidor. Feito por IP de nuvem, o Instagram às vezes bloqueia.</p>
+            <p class="sub" style="margin:0 0 10px">Cole o <b>@ ou o link do perfil</b> no campo de link lá em cima, marque o que quer e gere um <b>.zip</b>. O login já está ativo no servidor — <b>não precisa fazer nada de cookie</b> (se preferir usar o seu, use a seção abaixo). Perfis grandes demoram e têm teto de itens. Feito por IP de nuvem, o Instagram às vezes bloqueia.</p>
             <label class="dl-check"><input type="checkbox" id="ig-p-posts" checked> Fotos e vídeos (posts + reels)</label>
             <label class="dl-check" style="margin-top:8px"><input type="checkbox" id="ig-p-high" checked> Destaques (highlights)</label>
             <button class="btn" id="ig-collect-btn" style="margin-top:12px">Baixar perfil do Instagram (.zip)</button>
@@ -1436,14 +1436,13 @@
     const posts=$("#ig-p-posts").checked, high=$("#ig-p-high").checked;
     if(!posts && !high){ $("#ig-collect-note").textContent="Marque pelo menos uma opção (fotos/vídeos ou destaques)."; return; }
     const mode=(posts&&high)?"all":(posts?"posts":"highlights");
-    $("#ig-collect-note").textContent="Verificando o cookie do Instagram…";
-    const sid=await ensureIgSid();
-    if(!sid){ $("#ig-collect-note").textContent="Salve o cookie do Instagram primeiro (seção logo abaixo)."; return; }
     $("#ig-collect-btn").disabled=true;
+    // cookie do navegador é opcional: se não houver, o servidor usa o cookie fixo dele
+    const sid=await ensureIgSid();
     $("#ig-collect-note").textContent="Baixando do Instagram no servidor — fotos, vídeos e destaques num único .zip. Perfis grandes demoram; deixe a aba aberta.";
     toast("Baixando perfil do Instagram…");
     try{
-      const r=await fetch(base+"/ig-collect",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user:url,mode,ig:sid})});
+      const r=await fetch(base+"/ig-collect",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user:url,mode,ig:sid||undefined})});
       const d=await r.json(); if(!r.ok||d.error) throw new Error(d.error||("HTTP "+r.status));
       trigger(base+"/ig-zip?token="+encodeURIComponent(d.token));
       $("#ig-collect-note").textContent="Quando o servidor terminar, o instagram.zip baixa sozinho. Se vier vazio, o Instagram bloqueou (IP de nuvem) ou o cookie expirou.";
