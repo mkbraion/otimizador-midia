@@ -1,3 +1,19 @@
+<!-- MKBRAION-POLISH:START -->
+<div align="center">
+
+# Otimizador Midia
+
+**Ferramenta web para processamento de imagens e vídeos com FFmpeg WebAssembly, OCR com Tesseract.js e integração com backend de mídia.**
+
+[![Repositório](https://img.shields.io/badge/GitHub-Repositório-181717?logo=github)](https://github.com/mkbraion/otimizador-midia) [![Demo ao vivo](https://img.shields.io/badge/Demo-Abrir%20aplicação-2ea44f?logo=vercel)](https://otimizador-midia.vercel.app)
+
+</div>
+
+**Stack / tópicos:** ``css`` · ``ffmpeg`` · ``frontend`` · ``html`` · ``image-processing`` · ``javascript`` · ``media-tools`` · ``nodejs`` · ``ocr`` · ``tesseractjs`` · ``vercel`` · ``video-processing``
+
+> Projeto mantido por [@mkbraion](https://github.com/mkbraion).
+<!-- MKBRAION-POLISH:END -->
+
 # Oficina de Mídia
 
 Ferramenta web para processamento de imagem e vídeo, com operações locais no navegador e integração com um backend de download de mídia.
